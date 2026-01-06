@@ -1,11 +1,11 @@
-# @kodai-yamamoto-siw/exercise
+# @metyatech/exercise
 
 Docusaurus で演習課題と解答の折りたたみ表示を提供するプラグインです。演習タイトルは自動的に目次（Table of Contents）へ登録され、教材執筆時の手間を減らします。
 
 ## インストール
 
 ```bash
-npm install @kodai-yamamoto-siw/exercise
+npm install @metyatech/exercise
 ```
 
 ローカルのモノレポ構成では、相対パスで次のように追加できます。
@@ -25,7 +25,7 @@ const config: Config = {
   // ...既存設定...
   plugins: [
     [
-      '@kodai-yamamoto-siw/exercise',
+      '@metyatech/exercise',
       {
         headingLevel: 2,
       },
@@ -39,7 +39,7 @@ export default config;
 各 MDX ファイルでは、演習コンポーネントをクライアント用エントリから読み込みます。
 
 ```mdx
-import Exercise, { Solution } from '@kodai-yamamoto-siw/exercise/client';
+import Exercise, { Solution } from '@metyatech/exercise/client';
 ```
 
 ## 使い方
@@ -47,7 +47,7 @@ import Exercise, { Solution } from '@kodai-yamamoto-siw/exercise/client';
 演習はタイトルと本文、必要に応じて `Solution` ブロックを子要素として記述します。タイトルは自動で目次に追加されます。
 
 ```mdx
-import Exercise, { Solution } from '@kodai-yamamoto-siw/exercise/client';
+import Exercise, { Solution } from '@metyatech/exercise/client';
 
 <Exercise title="ボックスの色を変えましょう">
 課題の説明をここに書きます。

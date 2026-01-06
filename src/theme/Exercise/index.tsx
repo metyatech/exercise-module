@@ -4,7 +4,7 @@ import Solution, {type SolutionProps} from './Solution.js';
 import {applyBlankPlaceholders} from './blanks.js';
 import {exerciseClasses as classes} from './classes.js';
 
-const STYLE_ELEMENT_ID = 'kodai-yamamoto-siw-exercise-style';
+const STYLE_ELEMENT_ID = 'metyatech-exercise-style';
 
 const stylesText = `
 .${classes.section} {

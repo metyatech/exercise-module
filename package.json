@@ -1,5 +1,5 @@
 {
-  "name": "@kodai-yamamoto-siw/exercise",
+  "name": "@metyatech/exercise",
   "version": "0.1.1",
   "description": "Docusaurus 向けの演習セクション用プラグイン",
   "type": "module",

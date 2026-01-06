@@ -27,7 +27,7 @@ export default function exercisePlugin(
   const themePath = path.resolve(currentDir, './theme');
 
   const plugin: Plugin = {
-    name: '@kodai-yamamoto-siw/docusaurus-plugin-exercise',
+    name: '@metyatech/docusaurus-plugin-exercise',
 
     getThemePath() {
       return themePath;
