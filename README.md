@@ -2,7 +2,9 @@
 
 Docusaurus で演習課題と解答の折りたたみ表示を提供するプラグインです。演習タイトルは自動的に目次（Table of Contents）へ登録され、教材執筆時の手間を減らします。
 
-## インストール
+## セットアップ
+
+### インストール
 
 ```bash
 npm install @metyatech/exercise
@@ -69,3 +71,19 @@ import Exercise, { Solution } from '@metyatech/exercise/client';
 ## スタイル
 
 必要なスタイルはクライアント側で自動挿入されます。Docusaurus のダークモード／ライトモード切り替えにも対応しています。
+
+## 開発コマンド
+
+- `npm run build`: ビルド
+- `npm run test`: ビルド + テスト
+- `npm run lint`: 型チェック
+
+## 環境変数/設定
+
+特になし。
+
+## 公開/デプロイ
+
+```bash
+npm publish
+```
