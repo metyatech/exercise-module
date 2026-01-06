@@ -1,30 +1,24 @@
 # @metyatech/exercise
 
-Docusaurus で演習課題と解答の折りたたみ表示を提供するプラグインです。演習タイトルは自動的に目次（Table of Contents）へ登録され、教材執筆時の手間を減らします。
+A Docusaurus plugin that provides collapsible Exercise/Solution sections. Exercise titles are automatically registered in the Table of Contents to reduce authoring overhead.
 
-## セットアップ
+## Setup
 
-### インストール
+### Installation
 
 ```bash
 npm install @metyatech/exercise
 ```
 
-ローカルのモノレポ構成では、相対パスで次のように追加できます。
+## Configuration
 
-```bash
-npm install ../packages/exercise-module
-```
-
-## 設定
-
-`docusaurus.config.ts` にプラグインを追加します。`headingLevel` を変更すると演習タイトルの見出し階層（既定は h3）を調整できます。
+Add the plugin to `docusaurus.config.ts`. Use `headingLevel` to adjust the heading level for exercise titles (default: `3`).
 
 ```ts
 import type {Config} from '@docusaurus/types';
 
 const config: Config = {
-  // ...既存設定...
+  // ...existing config...
   plugins: [
     [
       '@metyatech/exercise',
@@ -38,51 +32,51 @@ const config: Config = {
 export default config;
 ```
 
-各 MDX ファイルでは、演習コンポーネントをクライアント用エントリから読み込みます。
+Import client components from each MDX file:
 
 ```mdx
 import Exercise, { Solution } from '@metyatech/exercise/client';
 ```
 
-## 使い方
+## Usage
 
-演習はタイトルと本文、必要に応じて `Solution` ブロックを子要素として記述します。タイトルは自動で目次に追加されます。
+Write exercises as a component with optional `Solution`.
 
 ```mdx
 import Exercise, { Solution } from '@metyatech/exercise/client';
 
-<Exercise title="ボックスの色を変えましょう">
-課題の説明をここに書きます。
+<Exercise title="Change the box color">
+Write the instructions here.
 
 <Solution>
-解答のヒントや完成例をここに記載します。
+Write hints or sample solutions here.
 </Solution>
 </Exercise>
 ```
 
-解答を省略すると折りたたみ欄は表示されず、`solutionTitle` でボタンの文言を調整できます。
+If you omit `Solution`, the collapsible solution block is not shown. Use `solutionTitle` to customize the button label.
 
 ```mdx
-<Exercise title="ステップの確認" solutionTitle="ヒントを見る">
-段階的な説明だけを表示することもできます。
+<Exercise title="Check your steps" solutionTitle="Show hint">
+You can also show step-by-step text only.
 </Exercise>
 ```
 
-## スタイル
+## Styling
 
-必要なスタイルはクライアント側で自動挿入されます。Docusaurus のダークモード／ライトモード切り替えにも対応しています。
+Required styles are injected on the client side. Light/Dark mode is supported.
 
-## 開発コマンド
+## Development Commands
 
-- `npm run build`: ビルド
-- `npm run test`: ビルド + テスト
-- `npm run lint`: 型チェック
+- `npm run build`: build
+- `npm run test`: build + tests
+- `npm run lint`: typecheck
 
-## 環境変数/設定
+## Environment Variables/Settings
 
-特になし。
+None.
 
-## 公開/デプロイ
+## Release/Deploy
 
 ```bash
 npm publish
