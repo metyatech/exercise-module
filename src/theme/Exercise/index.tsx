@@ -228,6 +228,18 @@ const stylesText = `
   white-space: nowrap;
 }
 
+.${classes.blankAnswerList} {
+  display: grid;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.${classes.blankAnswerItem} {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
 .${classes.blankWrap}.${classes.blankHighlight} .${classes.blankInput} {
   border-color: var(--ifm-color-warning);
   box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);

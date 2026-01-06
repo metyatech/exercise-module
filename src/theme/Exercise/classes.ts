@@ -8,4 +8,6 @@ export const exerciseClasses = {
   blankBadge: 'rensyuBlankBadge',
   blankTag: 'rensyuBlankTag',
   blankHighlight: 'rensyuBlankHighlight',
+  blankAnswerList: 'rensyuBlankAnswerList',
+  blankAnswerItem: 'rensyuBlankAnswerItem',
 } as const;

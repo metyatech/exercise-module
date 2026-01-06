@@ -18,12 +18,7 @@ const html =
   '</code></pre>' +
   '</div>' +
   '<div class="rensyuKaitouNaiyou">' +
-  '<p>' +
-  blank('alpha') +
-  '</p>' +
-  '<p>' +
-  blank('beta') +
-  '</p>' +
+  '<p>解説</p>' +
   '</div>' +
   '</div>';
 
@@ -39,10 +34,18 @@ applyBlankPlaceholders(root);
 
 const inputs = root.querySelectorAll('.rensyuBlankInput');
 const tags = root.querySelectorAll('.rensyuBlankTag');
+const solutionRoot = root.querySelector('.rensyuKaitouNaiyou');
+const autoAnswers = root.querySelector('[data-blank-answers="true"]');
 
 assert.equal(inputs.length, 2, 'should create two input blanks in problem');
 assert.equal(tags.length, 2, 'should create two tags in solution');
 assert.ok(!root.textContent?.includes('${'), 'placeholders should be removed');
+assert.ok(solutionRoot, 'solution root should exist');
+assert.equal(
+  solutionRoot?.firstElementChild,
+  autoAnswers,
+  'answers should be inserted at the top of solution',
+);
 
 const firstBadge = inputs[0]?.parentElement?.querySelector('.rensyuBlankBadge');
 assert.equal(firstBadge?.textContent, '1', 'first badge should be 1');

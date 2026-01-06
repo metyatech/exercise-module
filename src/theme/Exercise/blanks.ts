@@ -8,8 +8,35 @@ type TextNodeInfo = {
   end: number;
 };
 
+type BlankMatch = {
+  start: number;
+  end: number;
+  answer: string;
+};
+
 function getBlankLabel(index: number): string {
   return String(index);
+}
+
+function getBlankMatches(text: string): BlankMatch[] {
+  if (!text.includes('${')) {
+    return [];
+  }
+
+  BLANK_PATTERN.lastIndex = 0;
+  const matches: BlankMatch[] = [];
+  let match: RegExpExecArray | null;
+
+  while ((match = BLANK_PATTERN.exec(text)) !== null) {
+    const answer = match[1]?.trim() ?? '';
+    matches.push({
+      start: match.index,
+      end: match.index + match[0].length,
+      answer,
+    });
+  }
+
+  return matches;
 }
 
 function collectTextNodes(root: Element): { nodes: TextNodeInfo[]; text: string } {
@@ -47,27 +74,12 @@ function findNodeAtOffset(
 function replacePlaceholdersInElement(
   root: Element,
   createNode: (index: number, answer: string) => Node,
-): void {
+): BlankMatch[] {
   const { nodes, text } = collectTextNodes(root);
-  if (!text.includes('${')) {
-    return;
-  }
-
-  BLANK_PATTERN.lastIndex = 0;
-  const matches: Array<{ start: number; end: number; answer: string }> = [];
-  let match: RegExpExecArray | null;
-
-  while ((match = BLANK_PATTERN.exec(text)) !== null) {
-    const answer = match[1]?.trim() ?? '';
-    matches.push({
-      start: match.index,
-      end: match.index + match[0].length,
-      answer,
-    });
-  }
+  const matches = getBlankMatches(text);
 
   if (!matches.length) {
-    return;
+    return [];
   }
 
   const nodesForMatch = matches.map((entry, index) =>
@@ -87,6 +99,8 @@ function replacePlaceholdersInElement(
     range.deleteContents();
     range.insertNode(nodesForMatch[i]);
   }
+
+  return matches;
 }
 
 function createBlankInput(index: number): HTMLElement {
@@ -128,6 +142,25 @@ function createBlankTag(index: number, answer: string): Node {
   return fragment;
 }
 
+function insertBlankAnswers(root: Element, matches: BlankMatch[]): void {
+  if (!matches.length || root.querySelector('[data-blank-answers="true"]')) {
+    return;
+  }
+
+  const list = document.createElement('div');
+  list.className = classes.blankAnswerList;
+  list.dataset.blankAnswers = 'true';
+
+  matches.forEach((match, index) => {
+    const item = document.createElement('div');
+    item.className = classes.blankAnswerItem;
+    item.appendChild(createBlankTag(index + 1, match.answer));
+    list.appendChild(item);
+  });
+
+  root.insertBefore(list, root.firstChild);
+}
+
 function bindBlankHighlights(root: Element): void {
   const setHighlight = (index: string, state: boolean) => {
     const targets = root.querySelectorAll(`[data-blank-index="${index}"]`);
@@ -158,17 +191,21 @@ function bindBlankHighlights(root: Element): void {
 
 export function applyBlankPlaceholders(root: HTMLElement): void {
   const problemRoot = root.querySelector(`.${classes.content}`);
-  if (problemRoot) {
-    replacePlaceholdersInElement(problemRoot, (index) =>
-      createBlankInput(index),
-    );
-  }
+  const problemMatches = problemRoot
+    ? replacePlaceholdersInElement(problemRoot, (index) =>
+        createBlankInput(index),
+      )
+    : [];
 
   const solutionRoot = root.querySelector(`.${classes.solutionContent}`);
-  if (solutionRoot) {
-    replacePlaceholdersInElement(solutionRoot, (index, answer) =>
-      createBlankTag(index, answer),
-    );
+  const solutionMatches = solutionRoot
+    ? replacePlaceholdersInElement(solutionRoot, (index, answer) =>
+        createBlankTag(index, answer),
+      )
+    : [];
+
+  if (solutionRoot && problemMatches.length > 0 && solutionMatches.length === 0) {
+    insertBlankAnswers(solutionRoot, problemMatches);
   }
 
   bindBlankHighlights(root);
