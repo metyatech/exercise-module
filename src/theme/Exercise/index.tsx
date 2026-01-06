@@ -1,15 +1,10 @@
-import React, {Children, ReactElement, ReactNode, useEffect} from 'react';
+import React, {Children, ReactElement, ReactNode, useEffect, useRef} from 'react';
 import Heading from '@theme/Heading';
 import Solution, {type SolutionProps} from './Solution.js';
+import {applyBlankPlaceholders} from './blanks.js';
+import {exerciseClasses as classes} from './classes.js';
 
 const STYLE_ELEMENT_ID = 'kodai-yamamoto-siw-exercise-style';
-
-const classes = {
-  section: 'rensyuBlock',
-  content: 'rensyuNaiyou',
-  solution: 'rensyuKaitou',
-  solutionContent: 'rensyuKaitouNaiyou',
-} as const;
 
 const stylesText = `
 .${classes.section} {
@@ -186,6 +181,61 @@ const stylesText = `
   white-space: nowrap;
   border: 0;
 }
+
+.${classes.blankWrap} {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  margin: 0 0.4rem;
+}
+
+.${classes.blankInput} {
+  width: 7rem;
+  min-width: 6rem;
+  padding: 0.2rem 0.5rem;
+  border: 2px solid var(--ifm-color-primary);
+  border-radius: 6px;
+  background: var(--ifm-background-surface-color);
+  color: var(--ifm-color-emphasis-900);
+  height: 1.8em;
+  font-family: var(--ifm-font-family-monospace);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.${classes.blankBadge} {
+  position: absolute;
+  top: -0.6rem;
+  left: -0.6rem;
+  background: var(--ifm-color-primary);
+  color: #fff;
+  font-size: 0.75em;
+  padding: 0.1rem 0.35rem;
+  border-radius: 999px;
+  font-weight: 700;
+  box-shadow: var(--ifm-global-shadow-lw);
+}
+
+.${classes.blankTag} {
+  display: inline-flex;
+  align-items: center;
+  background: var(--ifm-color-primary);
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.05rem 0.5rem;
+  font-size: 0.85em;
+  font-weight: 700;
+  margin-right: 0.35rem;
+  white-space: nowrap;
+}
+
+.${classes.blankWrap}.${classes.blankHighlight} .${classes.blankInput} {
+  border-color: var(--ifm-color-warning);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
+
+.${classes.blankTag}.${classes.blankHighlight} {
+  background: var(--ifm-color-warning);
+}
 `;
 
 function useExerciseStyles(): void {
@@ -222,6 +272,8 @@ export interface ExerciseProps {
   children: ReactNode;
   /** 解答欄の見出し */
   solutionTitle?: string;
+  /** 穴埋め置換を有効化 */
+  enableBlanks?: boolean;
   /** TOC連携用の見出しID */
   headingId?: string;
   /** 見出しレベル */
@@ -235,10 +287,12 @@ export default function Exercise({
   title,
   children,
   solutionTitle = '解答を表示',
+  enableBlanks = false,
   headingId,
   headingLevel,
 }: ExerciseProps): ReactElement {
   useExerciseStyles();
+  const rootRef = useRef<HTMLDivElement>(null);
 
   const childrenArray = Children.toArray(children);
 
@@ -273,8 +327,21 @@ export default function Exercise({
     (child) => !(React.isValidElement(child) && child.type === Solution),
   );
 
+  useEffect(() => {
+    if (!enableBlanks) {
+      return;
+    }
+    const root = rootRef.current;
+    if (!root || root.dataset.blankProcessed === 'true') {
+      return;
+    }
+    root.dataset.blankProcessed = 'true';
+
+    applyBlankPlaceholders(root);
+  }, []);
+
   return (
-    <div className={classes.section} aria-labelledby={headingId}>
+    <div className={classes.section} aria-labelledby={headingId} ref={rootRef}>
   <Heading as={headingTag} id={visualHeadingId} aria-hidden={headingId ? 'true' : undefined}>
         {headingContent}
       </Heading>
@@ -303,3 +370,4 @@ function toHeadingTag(level?: number): ExerciseHeadingTag {
   const normalized = Math.min(6, Math.max(1, Math.round(level)));
   return `h${normalized}` as ExerciseHeadingTag;
 }
+
