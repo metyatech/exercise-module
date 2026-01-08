@@ -1,7 +1,7 @@
 import React, {Children, ReactElement, ReactNode, useEffect, useRef} from 'react';
 import Heading from '@theme/Heading';
 import Solution, {type SolutionProps} from './Solution.js';
-import {applyBlankPlaceholders} from './blanks.js';
+import {startBlankPlaceholderObserver} from './blanks.js';
 import {exerciseClasses as classes} from './classes.js';
 
 const STYLE_ELEMENT_ID = 'metyatech-exercise-style';
@@ -344,13 +344,15 @@ export default function Exercise({
       return;
     }
     const root = rootRef.current;
-    if (!root || root.dataset.blankProcessed === 'true') {
+    if (!root) {
       return;
     }
-    root.dataset.blankProcessed = 'true';
 
-    applyBlankPlaceholders(root);
-  }, []);
+    const cleanup = startBlankPlaceholderObserver(root);
+    return () => {
+      cleanup();
+    };
+  }, [enableBlanks]);
 
   return (
     <div className={classes.section} aria-labelledby={headingId} ref={rootRef}>

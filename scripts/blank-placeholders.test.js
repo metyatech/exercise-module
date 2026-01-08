@@ -1,6 +1,10 @@
 import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
-import {applyBlankPlaceholders} from '../dist/theme/Exercise/blanks.js';
+import {
+  applyBlankPlaceholders,
+  applyBlankPlaceholdersIfNeeded,
+  startBlankPlaceholderObserver,
+} from '../dist/theme/Exercise/blanks.js';
 
 const blank = (value) => `$` + `{${value}}`;
 
@@ -56,3 +60,50 @@ assert.ok(
 );
 
 console.log('blank-placeholders test passed');
+
+const waitForMutations = async () => new Promise((resolve) => setTimeout(resolve, 0));
+
+const reloadHtml =
+  '<div id="root">' +
+  '<div class="rensyuNaiyou">' +
+  '<p>color: ' +
+  blank('delta') +
+  ';</p>' +
+  '</div>' +
+  '</div>';
+
+const reloadDom = new JSDOM(reloadHtml);
+globalThis.document = reloadDom.window.document;
+globalThis.NodeFilter = reloadDom.window.NodeFilter;
+globalThis.Node = reloadDom.window.Node;
+globalThis.MutationObserver = reloadDom.window.MutationObserver;
+
+const reloadRoot = reloadDom.window.document.getElementById('root');
+assert.ok(reloadRoot, 'reload root should exist');
+
+const cleanupObserver = startBlankPlaceholderObserver(reloadRoot);
+await waitForMutations();
+
+assert.ok(
+  reloadRoot.querySelectorAll('.rensyuBlankInput').length > 0,
+  'should create blanks on initial load',
+);
+
+const problemRoot = reloadRoot.querySelector('.rensyuNaiyou');
+assert.ok(problemRoot, 'problem root should exist');
+problemRoot.innerHTML = `<p>color: ${blank('echo')};</p>`;
+
+await waitForMutations();
+
+assert.ok(
+  reloadRoot.querySelectorAll('.rensyuBlankInput').length > 0,
+  'should reapply blanks after content rerender without Exercise rerender',
+);
+assert.ok(
+  !reloadRoot.textContent?.includes('${'),
+  'placeholders should be removed after reload',
+);
+
+cleanupObserver();
+
+console.log('blank-placeholders reload test passed');
