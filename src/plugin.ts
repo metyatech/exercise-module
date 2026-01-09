@@ -1,9 +1,11 @@
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import type {LoadContext, Plugin, OptionValidationContext} from '@docusaurus/types';
-import {Joi} from '@docusaurus/utils-validation';
+import utilsValidation from '@docusaurus/utils-validation';
 import type {Configuration as WebpackConfiguration, RuleSetRule} from 'webpack';
 import remarkExerciseHeadings from './remark/exerciseHeadings.js';
+
+const {Joi} = utilsValidation;
 
 export interface ExercisePluginOptions {
   /** 演習見出しのレベル（2〜6） */

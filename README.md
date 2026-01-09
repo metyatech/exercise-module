@@ -120,7 +120,7 @@ or swizzle the `@theme/Exercise` component.
 ## Development Commands
 
 - `npm run build`: build
-- `npm run test`: build + jsdom test
+- `npm run test`: build + node tests
 - `npm run lint`: typecheck
 
 ## Environment Variables/Settings

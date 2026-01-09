@@ -14,7 +14,7 @@
     "build": "npm run clean && tsc -p tsconfig.json",
     "lint": "tsc --noEmit",
     "prepare": "npm run build",
-    "test": "npm run build && node scripts/blank-placeholders.test.js"
+    "test": "npm run build && node scripts/blank-placeholders.test.js && node scripts/remark-headings.test.js && node scripts/webpack-injection.test.js"
   },
   "peerDependencies": {
     "@docusaurus/core": "^3.0.0",
