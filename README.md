@@ -123,6 +123,15 @@ or swizzle the `@theme/Exercise` component.
 - `npm run test`: build + node tests
 - `npm run lint`: typecheck
 
+## AGENTS.md
+
+This project uses `agent-rules` as a git submodule.
+Update `agent-ruleset.json` as needed and regenerate:
+
+```bash
+node agent-rules/tools/compose-agents.cjs
+```
+
 ## Environment Variables/Settings
 
 None.
