@@ -1,6 +1,7 @@
 import { exerciseClasses as classes } from './classes.js';
 
 const BLANK_PATTERN = /\$\{([^}]*)\}/g;
+const BLANK_MARKER = '${';
 
 type TextNodeInfo = {
   node: Text;
@@ -37,6 +38,10 @@ function getBlankMatches(text: string): BlankMatch[] {
   }
 
   return matches;
+}
+
+function hasBlankPlaceholders(root: Element): boolean {
+  return root.textContent?.includes(BLANK_MARKER) ?? false;
 }
 
 function collectTextNodes(root: Element): { nodes: TextNodeInfo[]; text: string } {
@@ -209,4 +214,60 @@ export function applyBlankPlaceholders(root: HTMLElement): void {
   }
 
   bindBlankHighlights(root);
+}
+
+export function applyBlankPlaceholdersIfNeeded(root: HTMLElement): void {
+  if (!hasBlankPlaceholders(root)) {
+    return;
+  }
+
+  root.dataset.blankProcessed = 'true';
+  applyBlankPlaceholders(root);
+}
+
+export function startBlankPlaceholderObserver(root: HTMLElement): () => void {
+  applyBlankPlaceholdersIfNeeded(root);
+
+  if (typeof MutationObserver === 'undefined') {
+    return () => {};
+  }
+
+  let scheduled = false;
+  let disposed = false;
+
+  const scheduleApply = () => {
+    if (scheduled || disposed) {
+      return;
+    }
+
+    scheduled = true;
+    const run = () => {
+      scheduled = false;
+      if (disposed) {
+        return;
+      }
+      applyBlankPlaceholdersIfNeeded(root);
+    };
+
+    if (typeof queueMicrotask === 'function') {
+      queueMicrotask(run);
+    } else {
+      Promise.resolve().then(run);
+    }
+  };
+
+  const observer = new MutationObserver(() => {
+    scheduleApply();
+  });
+
+  observer.observe(root, {
+    childList: true,
+    subtree: true,
+    characterData: true,
+  });
+
+  return () => {
+    disposed = true;
+    observer.disconnect();
+  };
 }
