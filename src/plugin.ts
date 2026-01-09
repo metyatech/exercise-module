@@ -1,15 +1,28 @@
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import type {LoadContext, Plugin, OptionValidationContext} from '@docusaurus/types';
-import utilsValidation from '@docusaurus/utils-validation';
+import * as utilsValidation from '@docusaurus/utils-validation';
 import type {Configuration as WebpackConfiguration, RuleSetRule} from 'webpack';
 import remarkExerciseHeadings from './remark/exerciseHeadings.js';
-
-const {Joi} = utilsValidation;
 
 export interface ExercisePluginOptions {
   /** 演習見出しのレベル（2〜6） */
   headingLevel?: number;
+}
+
+const resolveJoi = () => {
+  const fallback = (utilsValidation as {default?: {Joi?: unknown}}).default?.Joi;
+  const direct = (utilsValidation as {Joi?: unknown}).Joi;
+  return (direct ?? fallback) as typeof import('@docusaurus/utils-validation').Joi;
+};
+
+const Joi = resolveJoi();
+
+if (!Joi) {
+  throw new Error(
+    '[exercise plugin] Failed to resolve Joi from @docusaurus/utils-validation. ' +
+      'Please ensure the dependency is installed correctly.',
+  );
 }
 
 const DEFAULT_OPTIONS: Required<ExercisePluginOptions> = {
