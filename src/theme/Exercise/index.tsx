@@ -287,6 +287,11 @@ function isHeadingElement(
   );
 }
 
+const resolveRegisteredSolution = (
+  current: ReactNode | null,
+  next: ReactNode,
+): ReactNode | null => current ?? next;
+
 export interface ExerciseProps {
   /** 演習タイトル */
   title: string;
@@ -350,7 +355,7 @@ export default function Exercise({
     null,
   );
   const registerSolution = useCallback((content: ReactNode) => {
-    setRegisteredSolution((current) => (current === content ? current : current ?? content));
+    setRegisteredSolution((current) => resolveRegisteredSolution(current, content));
   }, []);
   const solutionContent = detectedSolutionContent ?? registeredSolution;
 

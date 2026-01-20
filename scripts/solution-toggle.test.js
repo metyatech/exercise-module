@@ -65,8 +65,34 @@ function SolutionHarness() {
 await act(async () => {
   reactRoot.render(React.createElement(SolutionHarness));
 });
+
+const waitForSolutionContent = async () => {
+  await new Promise((resolve) => {
+    const solutionContainer = dom.window.document.querySelector('[data-solution]');
+    if (!solutionContainer) {
+      resolve();
+      return;
+    }
+    if (solutionContainer.textContent?.includes('Answer')) {
+      resolve();
+      return;
+    }
+    const observer = new dom.window.MutationObserver(() => {
+      if (solutionContainer.textContent?.includes('Answer')) {
+        observer.disconnect();
+        resolve();
+      }
+    });
+    observer.observe(solutionContainer, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+  });
+};
+
 await act(async () => {
-  await new Promise((resolve) => setTimeout(resolve, 0));
+  await waitForSolutionContent();
 });
 
 const problem = dom.window.document.querySelector('[data-problem]');
@@ -85,6 +111,5 @@ assert.ok(
 await act(async () => {
   reactRoot.unmount();
 });
-console.log('solution context registration test passed');
 
 console.log('solution-toggle test passed');
