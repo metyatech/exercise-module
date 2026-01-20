@@ -356,7 +356,7 @@ export default function Exercise({
   );
   const registerSolution = useCallback((content: ReactNode) => {
     setRegisteredSolution((current) => keepFirstRegisteredSolution(current, content));
-  }, []);
+  }, [setRegisteredSolution]);
   const solutionContent = detectedSolutionContent ?? registeredSolution;
 
   const problemChildren = childrenArray.filter((child) => !isSolutionElement(child));
