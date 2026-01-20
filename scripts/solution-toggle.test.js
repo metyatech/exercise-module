@@ -66,20 +66,35 @@ await act(async () => {
   reactRoot.render(React.createElement(SolutionHarness));
 });
 
-const waitForSolutionContent = async () => {
-  await new Promise((resolve) => {
+const waitForSolutionContent = async (timeoutMs = 5000) => {
+  await new Promise((resolve, reject) => {
+    let observer;
+    const timeoutId = dom.window.setTimeout(() => {
+      if (observer) {
+        observer.disconnect();
+      }
+      reject(new Error('Timed out waiting for solution content'));
+    }, timeoutMs);
+
+    const cleanup = () => {
+      dom.window.clearTimeout(timeoutId);
+    };
+
     const solutionContainer = dom.window.document.querySelector('[data-solution]');
     if (!solutionContainer) {
+      cleanup();
       resolve();
       return;
     }
     if (solutionContainer.textContent?.includes('Answer')) {
+      cleanup();
       resolve();
       return;
     }
-    const observer = new dom.window.MutationObserver(() => {
+    observer = new dom.window.MutationObserver(() => {
       if (solutionContainer.textContent?.includes('Answer')) {
         observer.disconnect();
+        cleanup();
         resolve();
       }
     });

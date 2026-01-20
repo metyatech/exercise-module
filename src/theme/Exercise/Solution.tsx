@@ -8,7 +8,7 @@ export interface SolutionProps {
   children: ReactNode;
 }
 
-export default function Solution({children}: SolutionProps): ReactElement | null {
+export default function Solution({children}: SolutionProps): ReactElement {
   const registerSolution = useContext(SolutionRegistrationContext);
 
   useEffect(() => {
@@ -19,7 +19,7 @@ export default function Solution({children}: SolutionProps): ReactElement | null
   }, [children, registerSolution]);
 
   if (registerSolution) {
-    return null;
+    return <></>;
   }
   return <>{children}</>;
 }
