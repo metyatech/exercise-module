@@ -1,8 +1,18 @@
-import React, {Children, ReactElement, ReactNode, useEffect, useRef} from 'react';
+import React, {
+  Children,
+  ReactElement,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import Heading from '@theme/Heading';
 import Solution, {type SolutionProps} from './Solution.js';
 import {startBlankPlaceholderObserver} from './blanks.js';
 import {exerciseClasses as classes} from './classes.js';
+import {isSolutionElement} from './solutionDetection.js';
+import {SolutionRegistrationContext} from './solutionContext.js';
 
 const STYLE_ELEMENT_ID = 'metyatech-exercise-style';
 
@@ -331,13 +341,20 @@ export default function Exercise({
       ? headingElement.type
       : fallbackHeadingTag) as ExerciseHeadingTag;
 
-  const solutionChild = childrenArray.find(
-    (child) => React.isValidElement(child) && child.type === Solution,
+  const solutionChild = childrenArray.find(isSolutionElement);
+  const detectedSolutionContent =
+    React.isValidElement(solutionChild) && solutionChild.props
+      ? (solutionChild.props as SolutionProps).children
+      : null;
+  const [registeredSolution, setRegisteredSolution] = useState<ReactNode | null>(
+    null,
   );
+  const registerSolution = useCallback((content: ReactNode) => {
+    setRegisteredSolution((current) => (current === content ? current : current ?? content));
+  }, []);
+  const solutionContent = detectedSolutionContent ?? registeredSolution;
 
-  const problemChildren = childrenArray.filter(
-    (child) => !(React.isValidElement(child) && child.type === Solution),
-  );
+  const problemChildren = childrenArray.filter((child) => !isSolutionElement(child));
 
   useEffect(() => {
     if (!enableBlanks) {
@@ -355,22 +372,24 @@ export default function Exercise({
   }, [enableBlanks]);
 
   return (
-    <div className={classes.section} aria-labelledby={headingId} ref={rootRef}>
-  <Heading as={headingTag} id={visualHeadingId} aria-hidden={headingId ? 'true' : undefined}>
-        {headingContent}
-      </Heading>
-      <div className={classes.content}>{problemChildren}</div>
-      {solutionChild && (
-        <details className={classes.solution}>
-          <summary>{solutionTitle}</summary>
-          <div className={classes.solutionContent}>
-            {React.isValidElement(solutionChild) && solutionChild.props
-              ? (solutionChild.props as SolutionProps).children
-              : null}
-          </div>
-        </details>
-      )}
-    </div>
+    <SolutionRegistrationContext.Provider value={registerSolution}>
+      <div className={classes.section} aria-labelledby={headingId} ref={rootRef}>
+        <Heading
+          as={headingTag}
+          id={visualHeadingId}
+          aria-hidden={headingId ? 'true' : undefined}
+        >
+          {headingContent}
+        </Heading>
+        <div className={classes.content}>{problemChildren}</div>
+        {solutionContent && (
+          <details className={classes.solution}>
+            <summary>{solutionTitle}</summary>
+            <div className={classes.solutionContent}>{solutionContent}</div>
+          </details>
+        )}
+      </div>
+    </SolutionRegistrationContext.Provider>
   );
 }
 
