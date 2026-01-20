@@ -287,7 +287,7 @@ function isHeadingElement(
   );
 }
 
-const resolveRegisteredSolution = (
+const keepFirstRegisteredSolution = (
   current: ReactNode | null,
   next: ReactNode,
 ): ReactNode | null => current ?? next;
@@ -355,7 +355,7 @@ export default function Exercise({
     null,
   );
   const registerSolution = useCallback((content: ReactNode) => {
-    setRegisteredSolution((current) => resolveRegisteredSolution(current, content));
+    setRegisteredSolution((current) => keepFirstRegisteredSolution(current, content));
   }, []);
   const solutionContent = detectedSolutionContent ?? registeredSolution;
 

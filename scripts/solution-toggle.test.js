@@ -66,7 +66,7 @@ await act(async () => {
   reactRoot.render(React.createElement(SolutionHarness));
 });
 
-const waitForSolutionContent = async (timeoutMs = 5000) => {
+const waitForSolutionContent = async (timeoutMs = 1000) => {
   await new Promise((resolve, reject) => {
     let observer;
     const timeoutId = dom.window.setTimeout(() => {
