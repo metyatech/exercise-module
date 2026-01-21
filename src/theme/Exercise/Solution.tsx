@@ -15,9 +15,15 @@ export default function Solution({children}: SolutionProps): ReactElement {
     if (!registerSolution) {
       return;
     }
-    registerSolution(children);
+    registerSolution({
+      __exerciseSolutionAction: 'set',
+      content: children,
+    });
     return () => {
-      registerSolution(null);
+      registerSolution({
+        __exerciseSolutionAction: 'clear',
+        content: children,
+      });
     };
   }, [children, registerSolution]);
 

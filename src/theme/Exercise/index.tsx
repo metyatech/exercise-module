@@ -12,7 +12,11 @@ import Solution, {type SolutionProps} from './Solution.js';
 import {startBlankPlaceholderObserver} from './blanks.js';
 import {exerciseClasses as classes} from './classes.js';
 import {isSolutionElement} from './solutionDetection.js';
-import {SolutionRegistrationContext} from './solutionContext.js';
+import {
+  SolutionRegistrationContext,
+  type SolutionRegistrationAction,
+  type SolutionRegistrationPayload,
+} from './solutionContext.js';
 
 const STYLE_ELEMENT_ID = 'metyatech-exercise-style';
 
@@ -287,14 +291,27 @@ function isHeadingElement(
   );
 }
 
-const keepFirstRegisteredSolution = (
-  current: ReactNode | null,
-  next: ReactNode,
-): ReactNode | null => {
-  if (next === null) {
-    return null;
+const toRegistrationAction = (
+  payload: SolutionRegistrationPayload,
+): SolutionRegistrationAction => {
+  if (
+    payload &&
+    typeof payload === 'object' &&
+    '__exerciseSolutionAction' in payload
+  ) {
+    return payload as SolutionRegistrationAction;
   }
-  return current ?? next;
+  return {__exerciseSolutionAction: 'set', content: payload};
+};
+
+const applySolutionRegistration = (
+  current: ReactNode | null,
+  action: SolutionRegistrationAction,
+): ReactNode | null => {
+  if (action.__exerciseSolutionAction === 'clear') {
+    return current === action.content ? null : current;
+  }
+  return current ?? action.content;
 };
 
 export interface ExerciseProps {
@@ -359,8 +376,10 @@ export default function Exercise({
   const [registeredSolution, setRegisteredSolution] = useState<ReactNode | null>(
     null,
   );
-  const registerSolution = useCallback((content: ReactNode) => {
-    setRegisteredSolution((current) => keepFirstRegisteredSolution(current, content));
+  const registerSolution = useCallback((payload: SolutionRegistrationPayload) => {
+    setRegisteredSolution((current) =>
+      applySolutionRegistration(current, toRegistrationAction(payload)),
+    );
   }, []);
   const solutionContent = detectedSolutionContent ?? registeredSolution;
 
