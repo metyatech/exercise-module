@@ -16,6 +16,9 @@ export default function Solution({children}: SolutionProps): ReactElement {
       return;
     }
     registerSolution(children);
+    return () => {
+      registerSolution(null);
+    };
   }, [children, registerSolution]);
 
   if (registerSolution) {

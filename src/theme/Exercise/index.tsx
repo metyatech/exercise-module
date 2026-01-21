@@ -290,7 +290,12 @@ function isHeadingElement(
 const keepFirstRegisteredSolution = (
   current: ReactNode | null,
   next: ReactNode,
-): ReactNode | null => current ?? next;
+): ReactNode | null => {
+  if (next === null) {
+    return null;
+  }
+  return current ?? next;
+};
 
 export interface ExerciseProps {
   /** 演習タイトル */
@@ -356,7 +361,7 @@ export default function Exercise({
   );
   const registerSolution = useCallback((content: ReactNode) => {
     setRegisteredSolution((current) => keepFirstRegisteredSolution(current, content));
-  }, [setRegisteredSolution]);
+  }, []);
   const solutionContent = detectedSolutionContent ?? registeredSolution;
 
   const problemChildren = childrenArray.filter((child) => !isSolutionElement(child));
