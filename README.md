@@ -1,13 +1,12 @@
 # @metyatech/exercise
 
-A Docusaurus plugin and MDX components for exercise blocks with optional solutions,
-automatic TOC headings, and fill-in-the-blank placeholders.
+A Docusaurus plugin and MDX components for exercise blocks with optional solutions
+and fill-in-the-blank placeholders.
 
 ## Features
 
-- Styled Exercise block with a title and content area.
+- Styled Exercise block with a content area.
 - Optional collapsible Solution section.
-- Exercise titles are registered in the Table of Contents via a remark plugin.
 - Optional fill-in-the-blank inputs using `${answer}` placeholders.
 - Client-side styles injected once with light/dark support.
 
@@ -21,8 +20,7 @@ npm install @metyatech/exercise
 
 ### Configuration
 
-Add the plugin to `docusaurus.config.ts`. The `headingLevel` option controls the
-TOC heading level for exercise titles (default: `2`, range: `2-6`).
+Add the plugin to `docusaurus.config.ts`.
 
 ```ts
 import type {Config} from '@docusaurus/types';
@@ -30,12 +28,7 @@ import type {Config} from '@docusaurus/types';
 const config: Config = {
   // ...existing config...
   plugins: [
-    [
-      '@metyatech/exercise',
-      {
-        headingLevel: 2,
-      },
-    ],
+    '@metyatech/exercise',
   ],
 };
 
@@ -55,7 +48,9 @@ import Exercise, { Solution } from '@metyatech/exercise/client';
 ```mdx
 import Exercise, { Solution } from '@metyatech/exercise/client';
 
-<Exercise title="Change the box color">
+## Change the box color
+
+<Exercise>
 Write the instructions here.
 
 <Solution>
@@ -69,7 +64,9 @@ If you omit `Solution`, the collapsible solution block is not rendered.
 ### Custom solution label
 
 ```mdx
-<Exercise title="Check your steps" solutionTitle="Show hint">
+## Check your steps
+
+<Exercise solutionTitle="Show hint">
 You can also show step-by-step text only.
 </Exercise>
 ```
@@ -82,7 +79,9 @@ Enable placeholders with `enableBlanks`. Use `${answer}` in the exercise body,
 and optionally in the solution.
 
 ```mdx
-<Exercise title="CSS opacity" enableBlanks>
+## CSS opacity
+
+<Exercise enableBlanks>
 Set `opacity: ${alpha};` in the CSS rule.
 
 <Solution>
@@ -101,11 +100,9 @@ When `enableBlanks` is on:
 
 ### Exercise
 
-- `title` (required): Exercise title.
 - `solutionTitle`: Label for the solution toggle.
 - `enableBlanks`: Enable placeholder processing (default: `false`).
-- `headingId`: Used by the plugin to link TOC headings.
-- `headingLevel`: Used by the plugin to control the heading tag.
+Use Markdown headings in MDX to title the exercise block.
 
 ### Solution
 

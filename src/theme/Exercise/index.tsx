@@ -7,7 +7,6 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import Heading from '@theme/Heading';
 import Solution, {type SolutionProps} from './Solution.js';
 import {startBlankPlaceholderObserver} from './blanks.js';
 import {exerciseClasses as classes} from './classes.js';
@@ -184,18 +183,6 @@ const stylesText = `
   height: auto;
 }
 
-.exerciseHeadingAnchor {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
 .${classes.blankWrap} {
   display: inline-flex;
   align-items: center;
@@ -281,16 +268,6 @@ function useExerciseStyles(): void {
   }, []);
 }
 
-function isHeadingElement(
-  child: ReactNode,
-): child is ReactElement<{id?: string; children?: ReactNode}> {
-  return (
-    React.isValidElement(child) &&
-    typeof child.type === 'string' &&
-    /^h[1-6]$/.test(child.type as string)
-  );
-}
-
 const toRegistrationAction = (
   payload: SolutionRegistrationPayload,
 ): SolutionRegistrationAction => {
@@ -315,58 +292,26 @@ const applySolutionRegistration = (
 };
 
 export interface ExerciseProps {
-  /** 演習タイトル */
-  title: string;
   /** 課題の内容 */
   children: ReactNode;
   /** 解答欄の見出し */
   solutionTitle?: string;
   /** 穴埋め置換を有効化 */
   enableBlanks?: boolean;
-  /** TOC連携用の見出しID */
-  headingId?: string;
-  /** 見出しレベル */
-  headingLevel?: number;
 }
 
 export {Solution};
 export type {SolutionProps};
 
 export default function Exercise({
-  title,
   children,
   solutionTitle = '解答を表示',
   enableBlanks = false,
-  headingId,
-  headingLevel,
 }: ExerciseProps): ReactElement {
   useExerciseStyles();
   const rootRef = useRef<HTMLDivElement>(null);
 
   const childrenArray = Children.toArray(children);
-
-  const headingIndex = childrenArray.findIndex(isHeadingElement);
-  const headingElement =
-    headingIndex >= 0
-      ? (childrenArray[headingIndex] as ReactElement<{
-          id?: string;
-          children?: ReactNode;
-        }>)
-      : undefined;
-
-  if (headingIndex >= 0) {
-    childrenArray.splice(headingIndex, 1);
-  }
-
-  const visualHeadingId =
-    headingElement?.props?.id ?? (headingId ? `${headingId}--title` : undefined);
-  const headingContent = headingElement?.props?.children ?? title;
-  const fallbackHeadingTag = toHeadingTag(headingLevel);
-  const headingTag = (headingElement &&
-    typeof headingElement.type === 'string' &&
-    /^h[1-6]$/.test(headingElement.type as string)
-      ? headingElement.type
-      : fallbackHeadingTag) as ExerciseHeadingTag;
 
   const solutionChild = childrenArray.find(isSolutionElement);
   const detectedSolutionContent =
@@ -402,14 +347,7 @@ export default function Exercise({
 
   return (
     <SolutionRegistrationContext.Provider value={registerSolution}>
-      <div className={classes.section} aria-labelledby={headingId} ref={rootRef}>
-        <Heading
-          as={headingTag}
-          id={visualHeadingId}
-          aria-hidden={headingId ? 'true' : undefined}
-        >
-          {headingContent}
-        </Heading>
+      <div className={classes.section} ref={rootRef}>
         <div className={classes.content}>{problemChildren}</div>
         {solutionContent && (
           <details className={classes.solution}>
@@ -420,16 +358,5 @@ export default function Exercise({
       </div>
     </SolutionRegistrationContext.Provider>
   );
-}
-
-type ExerciseHeadingTag = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
-
-function toHeadingTag(level?: number): ExerciseHeadingTag {
-  if (!level) {
-    return 'h3';
-  }
-
-  const normalized = Math.min(6, Math.max(1, Math.round(level)));
-  return `h${normalized}` as ExerciseHeadingTag;
 }
 
