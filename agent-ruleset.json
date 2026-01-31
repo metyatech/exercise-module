@@ -3,8 +3,7 @@
   "domains": [
     "node",
     "release",
-    "web",
-    "ghws"
+    "web"
   ],
   "output": "AGENTS.md"
 }
