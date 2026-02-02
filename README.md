@@ -144,3 +144,7 @@ None.
 ```bash
 npm publish
 ```
+
+## Overview
+This repository contains the exercise-module project.
+
