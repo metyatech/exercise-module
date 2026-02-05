@@ -1,7 +1,5 @@
 <!-- markdownlint-disable MD025 -->
-
 # Tool Rules (compose-agentsmd)
-
 - Before starting any work, run `compose-agentsmd` from the project root.
 - To update shared rules, run `compose-agentsmd edit-rules`, edit the workspace rules, then run `compose-agentsmd apply-rules`.
 - Do not edit `AGENTS.md` directly; update the source rules and regenerate.
@@ -252,7 +250,7 @@ Source: github:metyatech/agent-rules@HEAD/rules/global/planning-and-approval-gat
 - Allowed before approval:
   - Clarifying questions and read-only inspection (reading files, searching, and `git status` / `git diff` / `git log`).
   - Any unavoidable automated work triggered as a side-effect of those read-only commands.
-  - Routine automated code-quality work that must not adversely affect program behavior: formatter/linter/typecheck/test/build runs (including auto-fix/formatting that modifies files) and dependency installation required to run them, as long as they do not publish/deploy/migrate anything.
+  - Routine verification commands that must not adversely affect program behavior: formatter/linter/typecheck/test/build runs in non-mutating modes (e.g., check/verify-only), and dependency installation required to run those verifications, as long as they do not modify tracked files or publish/deploy/migrate anything.
 - Before any other state-changing execution (writing or modifying files, running formatters that write changes, installing dependencies that modify lockfiles, or running git commands beyond status/diff/log), do all of the following:
   - Restate the request as concrete acceptance criteria (explicit goal, success/failure conditions).
   - Produce a written plan (use your planning tool when available) focused on the goal, approach, and verification checkpoints (do not enumerate per-file implementation details or exact commands unless the requester asks).
