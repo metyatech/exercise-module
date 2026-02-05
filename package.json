@@ -16,7 +16,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "npm run build",
-    "test": "npm run build && node scripts/blank-placeholders.test.js && node scripts/solution-toggle.test.js && node scripts/exercise-heading.test.js"
+    "test": "npm run build && node scripts/blank-placeholders.test.js && node scripts/solution-toggle.test.js && node scripts/exercise-heading.test.js && node scripts/plugin-signature.test.js && node scripts/ci-workflow.test.js"
   },
   "peerDependencies": {
     "@docusaurus/core": "^3.0.0",

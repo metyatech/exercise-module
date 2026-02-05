@@ -1,13 +1,20 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type {
+  LoadContext,
   OptionValidationContext,
   Plugin,
 } from '@docusaurus/types';
 
 export type ExercisePluginOptions = Record<string, never>;
 
-export default function exercisePlugin(): Plugin {
+export default function exercisePlugin(
+  _context: LoadContext,
+  _options?: ExercisePluginOptions,
+): Plugin {
+  void _context;
+  void _options;
+
   const currentDir = path.dirname(fileURLToPath(import.meta.url));
   const themePath = path.resolve(currentDir, './theme');
 
