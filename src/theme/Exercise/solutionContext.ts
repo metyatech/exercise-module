@@ -9,7 +9,9 @@ export type SolutionRegistrationPayload =
   | React.ReactNode
   | SolutionRegistrationAction;
 
-export type SolutionRegistration = (payload: SolutionRegistrationPayload) => void;
+export type SolutionRegistration = (
+  payload: SolutionRegistrationPayload,
+) => void;
 
 export const SolutionRegistrationContext =
   React.createContext<SolutionRegistration | null>(null);

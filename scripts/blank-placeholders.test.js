@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {JSDOM} from 'jsdom';
+import { JSDOM } from 'jsdom';
 import {
   applyBlankPlaceholders,
   applyBlankPlaceholdersIfNeeded,
@@ -61,7 +61,8 @@ assert.ok(
 
 console.log('blank-placeholders test passed');
 
-const waitForMutations = async () => new Promise((resolve) => setTimeout(resolve, 0));
+const waitForMutations = async () =>
+  new Promise((resolve) => setTimeout(resolve, 0));
 
 const reloadHtml =
   '<div id="root">' +

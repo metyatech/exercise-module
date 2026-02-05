@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 export { default } from './theme/Exercise/index.js';
 export type { ExerciseProps } from './theme/Exercise/index.js';

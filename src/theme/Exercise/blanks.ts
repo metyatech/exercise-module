@@ -44,7 +44,10 @@ function hasBlankPlaceholders(root: Element): boolean {
   return root.textContent?.includes(BLANK_MARKER) ?? false;
 }
 
-function collectTextNodes(root: Element): { nodes: TextNodeInfo[]; text: string } {
+function collectTextNodes(root: Element): {
+  nodes: TextNodeInfo[];
+  text: string;
+} {
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
   const nodes: TextNodeInfo[] = [];
   let text = '';
@@ -209,7 +212,11 @@ export function applyBlankPlaceholders(root: HTMLElement): void {
       )
     : [];
 
-  if (solutionRoot && problemMatches.length > 0 && solutionMatches.length === 0) {
+  if (
+    solutionRoot &&
+    problemMatches.length > 0 &&
+    solutionMatches.length === 0
+  ) {
     insertBlankAnswers(solutionRoot, problemMatches);
   }
 

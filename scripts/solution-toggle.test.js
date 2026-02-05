@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
-import React, {act} from 'react';
-import {JSDOM} from 'jsdom';
-import {createRoot} from 'react-dom/client';
-import Solution, {SOLUTION_COMPONENT_NAME} from '../dist/theme/Exercise/Solution.js';
-import {
-  SolutionRegistrationContext,
-} from '../dist/theme/Exercise/solutionContext.js';
-import {isSolutionElement} from '../dist/theme/Exercise/solutionDetection.js';
+import React, { act } from 'react';
+import { JSDOM } from 'jsdom';
+import { createRoot } from 'react-dom/client';
+import Solution, {
+  SOLUTION_COMPONENT_NAME,
+} from '../dist/theme/Exercise/Solution.js';
+import { SolutionRegistrationContext } from '../dist/theme/Exercise/solutionContext.js';
+import { isSolutionElement } from '../dist/theme/Exercise/solutionDetection.js';
 
 const solutionElement = React.createElement(
   Solution,
@@ -16,7 +16,7 @@ const solutionElement = React.createElement(
 
 assert.ok(isSolutionElement(solutionElement), 'should detect Solution element');
 
-function FakeSolution({children}) {
+function FakeSolution({ children }) {
   return React.createElement(React.Fragment, null, children);
 }
 
@@ -57,34 +57,34 @@ const resolveSolutionRegistration = (current, payload) => {
     '__exerciseSolutionAction' in payload;
   const action = isAction
     ? payload
-    : {__exerciseSolutionAction: 'set', content: payload};
+    : { __exerciseSolutionAction: 'set', content: payload };
   if (action.__exerciseSolutionAction === 'clear') {
     return current === action.content ? null : current;
   }
   return current ?? action.content;
 };
 
-function SolutionHarness({showFirst, showSecond}) {
+function SolutionHarness({ showFirst, showSecond }) {
   const [content, setContent] = React.useState(null);
   const registerSolution = React.useCallback((payload) => {
     setContent((current) => resolveSolutionRegistration(current, payload));
   }, []);
   return React.createElement(
     SolutionRegistrationContext.Provider,
-    {value: registerSolution},
+    { value: registerSolution },
     React.createElement(
       'div',
-      {'data-problem': 'true'},
+      { 'data-problem': 'true' },
       showFirst ? React.createElement(Solution, null, 'Answer 1') : null,
       showSecond ? React.createElement(Solution, null, 'Answer 2') : null,
     ),
-    React.createElement('div', {'data-solution': 'true'}, content),
+    React.createElement('div', { 'data-solution': 'true' }, content),
   );
 }
 
 await act(async () => {
   reactRoot.render(
-    React.createElement(SolutionHarness, {showFirst: true, showSecond: true}),
+    React.createElement(SolutionHarness, { showFirst: true, showSecond: true }),
   );
 });
 
@@ -107,7 +107,8 @@ const waitForSolutionMatch = async (
       dom.window.clearTimeout(timeoutId);
     };
 
-    const solutionContainer = dom.window.document.querySelector('[data-solution]');
+    const solutionContainer =
+      dom.window.document.querySelector('[data-solution]');
     if (!solutionContainer) {
       cleanup();
       resolve();
@@ -157,7 +158,10 @@ assert.ok(
 
 await act(async () => {
   reactRoot.render(
-    React.createElement(SolutionHarness, {showFirst: true, showSecond: false}),
+    React.createElement(SolutionHarness, {
+      showFirst: true,
+      showSecond: false,
+    }),
   );
 });
 await act(async () => {
@@ -170,7 +174,10 @@ assert.ok(
 
 await act(async () => {
   reactRoot.render(
-    React.createElement(SolutionHarness, {showFirst: false, showSecond: false}),
+    React.createElement(SolutionHarness, {
+      showFirst: false,
+      showSecond: false,
+    }),
   );
 });
 await act(async () => {

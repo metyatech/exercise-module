@@ -1,5 +1,8 @@
-import React, {type ReactElement, type ReactNode} from 'react';
-import Solution, {SOLUTION_COMPONENT_NAME, type SolutionProps} from './Solution.js';
+import React, { type ReactElement, type ReactNode } from 'react';
+import Solution, {
+  SOLUTION_COMPONENT_NAME,
+  type SolutionProps,
+} from './Solution.js';
 
 const matchesSolutionType = (type: unknown): boolean => {
   if (type === Solution) {
