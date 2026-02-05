@@ -1,7 +1,5 @@
 <!-- markdownlint-disable MD025 -->
-
 # Tool Rules (compose-agentsmd)
-
 - Before starting any work, run `compose-agentsmd` from the project root.
 - To update shared rules, run `compose-agentsmd edit-rules`, edit the workspace rules, then run `compose-agentsmd apply-rules`.
 - Do not edit `AGENTS.md` directly; update the source rules and regenerate.
@@ -67,7 +65,8 @@ Source: github:metyatech/agent-rules@HEAD/rules/global/command-execution.md
 - Keep changes scoped to affected repositories; when shared modules change, update consumers and verify at least one.
 - If no branch is specified, work on the current branch; direct commits to main/master are allowed.
 - After addressing PR review feedback, resolve the corresponding review thread(s) before concluding; if you lack permission, state it explicitly.
-- After pushing fixes for PR review feedback, re-request review from the same reviewer(s) when possible; if there are no current reviewers, ask who should review.
+- After pushing fixes for PR review feedback, always re-request review from the same reviewer(s) when possible; if there are no current reviewers, ask who should review.
+- When Codex and/or Copilot review bots are configured for the repo, always trigger a re-review after pushing fixes.
 - For Codex re-review: comment `@codex review` on the PR.
 - For Copilot re-review: use `gh api` to remove+re-request the bot reviewer `copilot-pull-request-reviewer[bot]` (do not rely on `gh pr edit --add-reviewer Copilot`).
   - Remove: `gh api --method DELETE /repos/{owner}/{repo}/pulls/{pr}/requested_reviewers -f "reviewers[]=copilot-pull-request-reviewer[bot]"`
@@ -246,14 +245,17 @@ Source: github:metyatech/agent-rules@HEAD/rules/global/planning-and-approval-gat
 
 # Planning and approval gate
 
-- Default to a two-phase workflow: plan first, execute after explicit user approval.
-- Before any state-changing execution (writing or modifying files, running formatters/linters/tests/builds, installing dependencies, or running git commands beyond status/diff/log), do all of the following:
-  - Restate the request as concrete acceptance criteria.
-  - Ask blocking questions and list key assumptions/risks.
-  - Produce a written plan (use your planning tool, e.g., `update_plan`) including the intended file changes and the commands you plan to run.
-  - Ask for approval explicitly and wait for a clear “yes” before executing.
-- Allowed before approval: clarifying questions and read-only inspection (reading files, searching, and `git status` / `git diff` / `git log`).
-- Exception: if the user explicitly requests immediate execution (e.g., “skip planning”, “just do it”), proceed without this gate.
+- Default to a two-phase workflow: clarify goal + plan first, execute after explicit requester approval.
+- If a request may require any state-changing work, you MUST first dialogue with the requester to clarify details and make the goal explicit. Do not proceed while the goal is ambiguous.
+- Allowed before approval:
+  - Clarifying questions and read-only inspection (reading files, searching, and `git status` / `git diff` / `git log`).
+  - Any unavoidable automated work triggered as a side-effect of those read-only commands.
+  - Routine verification commands that must not adversely affect program behavior: formatter/linter/typecheck/test/build runs in non-mutating modes (e.g., check/verify-only), and dependency installation required to run those verifications, as long as they do not modify tracked files or publish/deploy/migrate anything.
+- Before any other state-changing execution (writing or modifying files, running formatters that write changes, installing dependencies that modify lockfiles, or running git commands beyond status/diff/log), do all of the following:
+  - Restate the request as concrete acceptance criteria (explicit goal, success/failure conditions).
+  - Produce a written plan (use your planning tool when available) focused on the goal, approach, and verification checkpoints (do not enumerate per-file implementation details or exact commands unless the requester asks).
+  - Confirm the plan with the requester, ask for approval explicitly, and wait for a clear “yes” before executing.
+- No other exceptions: even if the user requests immediate execution (e.g., “skip planning”, “just do it”), treat that as a request to move quickly through this gate, not to bypass it.
 
 Source: github:metyatech/agent-rules@HEAD/rules/global/quality-testing-and-errors.md
 
