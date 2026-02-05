@@ -15,3 +15,5 @@ Thank you for your interest in contributing!
 - `npm install`: Install dependencies.
 - `npm run build`: Build the project.
 - `npm test`: Run tests.
+- `npm run lint`: Run ESLint and type check.
+- `npm run format`: Format code with Prettier.
