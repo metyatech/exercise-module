@@ -6,5 +6,6 @@ Currently only the latest version is supported.
 
 ## Reporting a Vulnerability
 
-Please report any security vulnerabilities by opening an issue in this repository.
-We will address it as soon as possible.
+Do not report security vulnerabilities via public GitHub issues.
+
+Please report vulnerabilities privately via GitHub Security Advisories for this repository.
