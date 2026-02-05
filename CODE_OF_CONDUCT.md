@@ -12,6 +12,6 @@ identity and orientation.
 We pledge to act and interact in ways that contribute to an open, welcoming,
 diverse, inclusive, and healthy community.
 
-... (Simplified for brevity) ...
-
-For the full version, see [Contributor Covenant](https://www.contributor-covenant.org/version/2/1/code_of_conduct.html)
+This document is a brief summary of our community standards.
+For the complete and authoritative Code of Conduct, please refer to the
+[Contributor Covenant, version 2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct.html).

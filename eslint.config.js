@@ -7,7 +7,7 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    files: ['**/*.{ts,tsx}'],
+    files: ['**/*.tsx'],
     plugins: {
       react,
     },
@@ -24,7 +24,9 @@ export default tseslint.config(
       },
     },
     rules: {
+      ...react.configs.flat.recommended.rules,
       'react/react-in-jsx-scope': 'off',
+      'react/prop-types': 'off',
     },
   },
   prettier,
