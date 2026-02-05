@@ -23,13 +23,11 @@ npm install @metyatech/exercise
 Add the plugin to `docusaurus.config.ts`.
 
 ```ts
-import type {Config} from '@docusaurus/types';
+import type { Config } from '@docusaurus/types';
 
 const config: Config = {
   // ...existing config...
-  plugins: [
-    '@metyatech/exercise',
-  ],
+  plugins: ['@metyatech/exercise'],
 };
 
 export default config;
@@ -67,7 +65,7 @@ If you omit `Solution`, the collapsible solution block is not rendered.
 ## Check your steps
 
 <Exercise solutionTitle="Show hint">
-You can also show step-by-step text only.
+  You can also show step-by-step text only.
 </Exercise>
 ```
 
@@ -102,7 +100,7 @@ When `enableBlanks` is on:
 
 - `solutionTitle`: Label for the solution toggle.
 - `enableBlanks`: Enable placeholder processing (default: `false`).
-Use Markdown headings in MDX to title the exercise block.
+  Use Markdown headings in MDX to title the exercise block.
 
 ### Solution
 
@@ -116,24 +114,15 @@ or swizzle the `@theme/Exercise` component.
 
 ## Development Commands
 
-- `npm run build`: build
-- `npm run test`: build + node tests
-- `npm run lint`: typecheck
+- `npm install`: Install dependencies.
+- `npm run build`: Build the project.
+- `npm run lint`: Run ESLint and type check.
+- `npm run format`: Format code with Prettier.
+- `npm test`: Run tests.
 
 ## AGENTS.md
 
-This project uses `agent-rules` and `agent-rules-tools` as git submodules.
-After cloning, initialize submodules:
-
-```bash
-git submodule update --init --recursive
-```
-
-Update `agent-ruleset.json` as needed and regenerate:
-
-```bash
-node agent-rules-tools/tools/compose-agents.cjs
-```
+This repository follows the rules defined in [AGENTS.md](./AGENTS.md).
 
 ## Environment Variables/Settings
 
@@ -146,5 +135,5 @@ npm publish
 ```
 
 ## Overview
-This repository contains the exercise-module project.
 
+This repository contains the exercise-module project.

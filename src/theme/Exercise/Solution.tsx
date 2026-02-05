@@ -1,5 +1,10 @@
-import {useContext, useEffect, type ReactElement, type ReactNode} from 'react';
-import {SolutionRegistrationContext} from './solutionContext.js';
+import {
+  useContext,
+  useEffect,
+  type ReactElement,
+  type ReactNode,
+} from 'react';
+import { SolutionRegistrationContext } from './solutionContext.js';
 
 export const SOLUTION_COMPONENT_NAME = 'ExerciseSolution';
 
@@ -8,7 +13,7 @@ export interface SolutionProps {
   children: ReactNode;
 }
 
-export default function Solution({children}: SolutionProps): ReactElement {
+export default function Solution({ children }: SolutionProps): ReactElement {
   const registerSolution = useContext(SolutionRegistrationContext);
 
   useEffect(() => {

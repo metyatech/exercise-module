@@ -7,10 +7,10 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import Solution, {type SolutionProps} from './Solution.js';
-import {startBlankPlaceholderObserver} from './blanks.js';
-import {exerciseClasses as classes} from './classes.js';
-import {isSolutionElement} from './solutionDetection.js';
+import Solution, { type SolutionProps } from './Solution.js';
+import { startBlankPlaceholderObserver } from './blanks.js';
+import { exerciseClasses as classes } from './classes.js';
+import { isSolutionElement } from './solutionDetection.js';
 import {
   SolutionRegistrationContext,
   type SolutionRegistrationAction,
@@ -278,7 +278,7 @@ const toRegistrationAction = (
   ) {
     return payload as SolutionRegistrationAction;
   }
-  return {__exerciseSolutionAction: 'set', content: payload};
+  return { __exerciseSolutionAction: 'set', content: payload };
 };
 
 const applySolutionRegistration = (
@@ -300,8 +300,8 @@ export interface ExerciseProps {
   enableBlanks?: boolean;
 }
 
-export {Solution};
-export type {SolutionProps};
+export { Solution };
+export type { SolutionProps };
 
 export default function Exercise({
   children,
@@ -318,17 +318,21 @@ export default function Exercise({
     React.isValidElement(solutionChild) && solutionChild.props
       ? (solutionChild.props as SolutionProps).children
       : null;
-  const [registeredSolution, setRegisteredSolution] = useState<ReactNode | null>(
-    null,
+  const [registeredSolution, setRegisteredSolution] =
+    useState<ReactNode | null>(null);
+  const registerSolution = useCallback(
+    (payload: SolutionRegistrationPayload) => {
+      setRegisteredSolution((current) =>
+        applySolutionRegistration(current, toRegistrationAction(payload)),
+      );
+    },
+    [],
   );
-  const registerSolution = useCallback((payload: SolutionRegistrationPayload) => {
-    setRegisteredSolution((current) =>
-      applySolutionRegistration(current, toRegistrationAction(payload)),
-    );
-  }, []);
   const solutionContent = detectedSolutionContent ?? registeredSolution;
 
-  const problemChildren = childrenArray.filter((child) => !isSolutionElement(child));
+  const problemChildren = childrenArray.filter(
+    (child) => !isSolutionElement(child),
+  );
 
   useEffect(() => {
     if (!enableBlanks) {
@@ -359,4 +363,3 @@ export default function Exercise({
     </SolutionRegistrationContext.Provider>
   );
 }
-
