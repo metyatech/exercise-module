@@ -47,8 +47,17 @@ assert.ok(
   `${workflowPath} should include at least one '- run:' step`,
 );
 assert.ok(
-  yaml.includes('npm audit --audit-level=moderate'),
-  `${workflowPath} should run npm audit in CI`,
+  (() => {
+    if (yaml.includes('npm audit --audit-level=moderate')) return true;
+    if (!yaml.includes('npm run verify')) return false;
+
+    const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+    const verifyScript = packageJson?.scripts?.verify;
+    if (typeof verifyScript !== 'string') return false;
+
+    return verifyScript.includes('npm audit --audit-level=moderate');
+  })(),
+  `${workflowPath} should run npm audit in CI (directly or via 'npm run verify')`,
 );
 assert.ok(
   yaml.includes('branches: [master, main]'),
