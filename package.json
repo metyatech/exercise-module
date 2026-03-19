@@ -17,7 +17,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky && npm run build",
-    "test": "npm run build && node scripts/blank-placeholders.test.js && node scripts/solution-toggle.test.js && node scripts/exercise-heading.test.js && node scripts/plugin-signature.test.js && node scripts/ci-workflow.test.js"
+    "test": "npm run build && node scripts/blank-placeholders.test.js && node scripts/solution-toggle.test.js && node scripts/exercise-heading.test.js && node scripts/plugin-signature.test.js && node scripts/ci-workflow.test.js",
+    "verify": "npm audit --audit-level=high && npm run format:check && npm run lint && npm test"
   },
   "peerDependencies": {
     "@docusaurus/core": "^3.0.0",
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "@docusaurus/types": "^3.9.2",
+    "@eslint/js": "^9.39.4",
     "@types/jsdom": "^27.0.0",
     "@types/node": "^24.6.1",
     "@types/react": "^19.1.16",
@@ -41,6 +43,9 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.54.0"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "lint-staged": {
     "src/**/*.{ts,tsx}": [
       "prettier --check",
@@ -49,9 +54,6 @@
     "*.{json,md}": [
       "prettier --check"
     ]
-  },
-  "overrides": {
-    "minimatch": "^10.2.1"
   },
   "exports": {
     ".": {
@@ -67,5 +69,11 @@
     "./theme": {
       "default": "./dist/theme/index.js"
     }
+  },
+  "overrides": {
+    "flatted": "3.4.0",
+    "minimatch": "10.2.3",
+    "serialize-javascript": "7.0.3",
+    "svgo": "3.3.3"
   }
 }
