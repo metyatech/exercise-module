@@ -119,6 +119,7 @@ or swizzle the `@theme/Exercise` component.
 - `npm run lint`: Run ESLint and type check.
 - `npm run format`: Format code with Prettier.
 - `npm test`: Run tests.
+- `npm run verify`: Run full verification (audit, format check, lint, tests).
 
 ## AGENTS.md
 
