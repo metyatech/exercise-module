@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import React, { act } from 'react';
 import { JSDOM } from 'jsdom';
 import { createRoot } from 'react-dom/client';
-import Exercise from '../dist/theme/Exercise/index.js';
+import Exercise, { Answer, Hint } from '../dist/theme/Exercise/index.js';
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -24,6 +24,8 @@ await act(async () => {
       { title: 'Should not render' },
       React.createElement('h3', null, 'Explicit heading'),
       React.createElement('p', null, 'Body'),
+      React.createElement(Hint, null, 'Hint'),
+      React.createElement(Answer, null, 'Answer'),
     ),
   );
 });

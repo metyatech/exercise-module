@@ -21,8 +21,15 @@ const html =
   '<span class="token punctuation">}</span>' +
   '</code></pre>' +
   '</div>' +
+  '<div class="rensyuHintNaiyou">' +
+  '<p>ヒント ' +
+  blank('hint-only') +
+  '</p>' +
+  '</div>' +
   '<div class="rensyuKaitouNaiyou">' +
-  '<p>解説</p>' +
+  '<p>解説 ' +
+  blank('alpha') +
+  '</p>' +
   '</div>' +
   '</div>';
 
@@ -38,25 +45,65 @@ applyBlankPlaceholders(root);
 
 const inputs = root.querySelectorAll('.rensyuBlankInput');
 const tags = root.querySelectorAll('.rensyuBlankTag');
-const solutionRoot = root.querySelector('.rensyuKaitouNaiyou');
+const answerRoot = root.querySelector('.rensyuKaitouNaiyou');
+const hintRoot = root.querySelector('.rensyuHintNaiyou');
 const autoAnswers = root.querySelector('[data-blank-answers="true"]');
 
 assert.equal(inputs.length, 2, 'should create two input blanks in problem');
-assert.equal(tags.length, 2, 'should create two tags in solution');
-assert.ok(!root.textContent?.includes('${'), 'placeholders should be removed');
-assert.ok(solutionRoot, 'solution root should exist');
+assert.equal(tags.length, 1, 'should create direct tags in answer');
+assert.ok(
+  root.querySelector('.rensyuNaiyou')?.textContent?.includes('${') === false,
+  'problem placeholders should be removed',
+);
+assert.ok(answerRoot, 'answer root should exist');
+assert.ok(hintRoot, 'hint root should exist');
+assert.ok(
+  hintRoot?.textContent?.includes(blank('hint-only')),
+  'hint placeholders should not become blanks',
+);
 assert.equal(
-  solutionRoot?.firstElementChild,
-  autoAnswers,
-  'answers should be inserted at the top of solution',
+  answerRoot?.firstElementChild?.textContent?.includes('alpha'),
+  true,
+  'direct answer tags should stay in answer content',
 );
 
 const firstBadge = inputs[0]?.parentElement?.querySelector('.rensyuBlankBadge');
 assert.equal(firstBadge?.textContent, '1', 'first badge should be 1');
-assert.equal(tags[1]?.textContent, '2', 'second tag should be 2');
+assert.equal(tags[0]?.textContent, '1', 'answer tag should be 1');
 assert.ok(
-  root.textContent?.includes('alpha') && root.textContent?.includes('beta'),
-  'solution should include answers',
+  root.textContent?.includes('alpha'),
+  'answer should include direct placeholder answers',
+);
+assert.equal(
+  autoAnswers,
+  null,
+  'auto answer list should not duplicate direct tags',
+);
+
+const autoHtml =
+  '<div id="auto-root">' +
+  '<div class="rensyuNaiyou"><p>width: ' +
+  blank('wide') +
+  ';</p></div>' +
+  '<div class="rensyuKaitouNaiyou"><p>解説</p></div>' +
+  '</div>';
+
+const autoDom = new JSDOM(autoHtml);
+globalThis.document = autoDom.window.document;
+globalThis.NodeFilter = autoDom.window.NodeFilter;
+globalThis.Node = autoDom.window.Node;
+
+const autoRoot = autoDom.window.document.getElementById('auto-root');
+assert.ok(autoRoot, 'auto answer root should exist');
+applyBlankPlaceholders(autoRoot);
+assert.ok(
+  autoRoot.querySelector('[data-blank-answers="true"]'),
+  'auto answer list should be inserted when Answer has no placeholders',
+);
+assert.match(
+  autoRoot.querySelector('.rensyuKaitouNaiyou')?.textContent ?? '',
+  /wide/,
+  'auto answer list should include problem answer text',
 );
 
 console.log('blank-placeholders test passed');

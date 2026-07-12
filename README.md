@@ -1,12 +1,13 @@
 # @metyatech/exercise
 
-A Docusaurus plugin and MDX components for exercise blocks with optional solutions
-and fill-in-the-blank placeholders.
+A Docusaurus plugin and MDX components for guided exercise blocks with hints,
+answers, quick checks, and fill-in-the-blank placeholders.
 
 ## Features
 
-- Styled Exercise block with a content area.
-- Optional collapsible Solution section.
+- Styled `Exercise` block with a problem area, one or more hints, and an answer.
+- Lightweight `QuickCheck` block for short comprehension checks.
+- Collapsible native `details`/`summary` sections for hints and answers.
 - Optional fill-in-the-blank inputs using `${answer}` placeholders.
 - Client-side styles injected once with light/dark support.
 
@@ -36,45 +37,74 @@ export default config;
 Import client components from each MDX file:
 
 ```mdx
-import Exercise, { Solution } from '@metyatech/exercise/client';
+import Exercise, { Answer, Hint, QuickCheck } from '@metyatech/exercise/client';
 ```
 
 ## Usage
 
-### Basic Exercise + Solution
+### Exercise with hints and an answer
 
 ```mdx
-import Exercise, { Solution } from '@metyatech/exercise/client';
+import Exercise, { Answer, Hint } from '@metyatech/exercise/client';
 
 ## Change the box color
 
 <Exercise>
 Write the instructions here.
 
-<Solution>
-Write hints or sample solutions here.
-</Solution>
+<Hint>Look for the CSS property that changes the background.</Hint>
+
+<Answer>
+Use `background-color` with the desired color value.
+</Answer>
 </Exercise>
 ```
 
-If you omit `Solution`, the collapsible solution block is not rendered.
+`Exercise` requires problem content, at least one `Hint`, and exactly one
+`Answer` in that order. A single hint is labeled `ヒントを見る`; multiple hints
+are labeled `ヒント1`, `ヒント2`, and so on. The answer summary defaults to
+`解答を見る`.
 
-### Custom solution label
+### QuickCheck
+
+Use `QuickCheck` for shorter checks. It uses the same child structure as
+`Exercise`, but the answer summary defaults to `答えを見る`.
 
 ```mdx
-## Check your steps
+import { Answer, Hint, QuickCheck } from '@metyatech/exercise/client';
 
-<Exercise solutionTitle="Show hint">
-  You can also show step-by-step text only.
+<QuickCheck>
+Which CSS property controls transparency?
+
+<Hint>It accepts values from `0` to `1`.</Hint>
+
+<Answer>
+Use `opacity`.
+</Answer>
+</QuickCheck>
+```
+
+### Custom answer label
+
+```mdx
+<Exercise answerTitle="Show answer">
+  Read the code and predict the output.
+
+<Hint>Trace the variable assignment first.</Hint>
+
+  <Answer>The final value is `3`.</Answer>
 </Exercise>
 ```
 
-`solutionTitle` defaults to a Japanese label; set it if you need another language.
+`answerTitle` changes the answer toggle label. The old `solutionTitle` prop is
+temporarily accepted for migration, but new code should use `answerTitle`.
 
 ### Fill-in-the-blank inputs
 
-Enable placeholders with `enableBlanks`. Use `${answer}` in the exercise body,
-and optionally in the solution.
+Enable placeholders with `enableBlanks`. Use `${answer}` in the problem body;
+placeholders in `Hint` are ignored, and placeholders in `Answer` become answer
+tags. If the answer has no placeholders, answers from the problem body are
+listed automatically in the answer area.
 
 ```mdx
 ## CSS opacity
@@ -82,35 +112,71 @@ and optionally in the solution.
 <Exercise enableBlanks>
 Set `opacity: ${alpha};` in the CSS rule.
 
-<Solution>
+<Hint>The value is between `0` and `1`.</Hint>
+
+<Answer>
 The correct value is `${alpha}`.
+</Answer>
+</Exercise>
+```
+
+## Deprecated Phase 1 migration adapter
+
+`Solution` is still exported temporarily so existing exercises can migrate in
+two steps. It is only valid as the final direct child of `Exercise` with problem
+content before it and no `Hint` or `Answer` children.
+
+```mdx
+import Exercise, { Solution } from '@metyatech/exercise/client';
+
+<Exercise>
+Legacy problem text.
+
+<Solution>
+Legacy answer text.
 </Solution>
 </Exercise>
 ```
 
-When `enableBlanks` is on:
-
-- Placeholders in the exercise body become input fields.
-- Placeholders in the solution become labeled tags.
-- If the solution has no placeholders, answers from the exercise body are listed automatically.
+`QuickCheck` never accepts `Solution`, and new `Hint`/`Answer` children cannot
+be mixed with legacy `Solution`.
 
 ## Component Props
 
 ### Exercise
 
-- `solutionTitle`: Label for the solution toggle.
+- `children` (required): Problem content, one or more `Hint` children, and one
+  `Answer` child.
+- `answerTitle`: Label for the answer toggle (default: `解答を見る`).
+- `solutionTitle` (deprecated): Temporary alias for `answerTitle`.
 - `enableBlanks`: Enable placeholder processing (default: `false`).
-  Use Markdown headings in MDX to title the exercise block.
 
-### Solution
+### QuickCheck
 
-- `children` (required): Content to show when expanded.
+- `children` (required): Problem content, one or more `Hint` children, and one
+  `Answer` child.
+- `answerTitle`: Label for the answer toggle (default: `答えを見る`).
+- `quickCheckTitle`: Small heading shown above the problem (default:
+  `Quick Check`).
+- `enableBlanks`: Enable placeholder processing (default: `false`).
+
+### Hint
+
+- `children` (required): Hint content to show when expanded.
+
+### Answer
+
+- `children` (required): Answer content to show when expanded.
+
+### Solution (deprecated)
+
+- `children` (required): Legacy answer content for Phase 1 migration only.
 
 ## Styling
 
 Styles are injected on the client side once. If you need to override them,
-target the class names (e.g. `rensyuBlock`, `rensyuKaitou`) in your site CSS
-or swizzle the `@theme/Exercise` component.
+target the class names (e.g. `rensyuBlock`, `rensyuNaiyou`, `rensyuHint`,
+`rensyuKaitou`) in your site CSS or swizzle the `@theme/Exercise` component.
 
 ## Development Commands
 
@@ -119,6 +185,7 @@ or swizzle the `@theme/Exercise` component.
 - `npm run lint`: Run ESLint and type check.
 - `npm run format`: Format code with Prettier.
 - `npm test`: Run tests.
+- `npm run verify`: Run lint, format check, and tests.
 
 ## AGENTS.md
 

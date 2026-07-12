@@ -1,8 +1,12 @@
 export const exerciseClasses = {
   section: 'rensyuBlock',
   content: 'rensyuNaiyou',
+  hint: 'rensyuHint',
+  hintContent: 'rensyuHintNaiyou',
   solution: 'rensyuKaitou',
   solutionContent: 'rensyuKaitouNaiyou',
+  quickCheck: 'rensyuQuickCheck',
+  quickCheckTitle: 'rensyuQuickCheckTitle',
   blankWrap: 'rensyuBlankWrap',
   blankInput: 'rensyuBlankInput',
   blankBadge: 'rensyuBlankBadge',

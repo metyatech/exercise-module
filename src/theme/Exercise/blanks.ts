@@ -26,15 +26,16 @@ function getBlankMatches(text: string): BlankMatch[] {
 
   BLANK_PATTERN.lastIndex = 0;
   const matches: BlankMatch[] = [];
-  let match: RegExpExecArray | null;
+  let match = BLANK_PATTERN.exec(text);
 
-  while ((match = BLANK_PATTERN.exec(text)) !== null) {
+  while (match !== null) {
     const answer = match[1]?.trim() ?? '';
     matches.push({
       start: match.index,
       end: match.index + match[0].length,
       answer,
     });
+    match = BLANK_PATTERN.exec(text);
   }
 
   return matches;
@@ -205,19 +206,15 @@ export function applyBlankPlaceholders(root: HTMLElement): void {
       )
     : [];
 
-  const solutionRoot = root.querySelector(`.${classes.solutionContent}`);
-  const solutionMatches = solutionRoot
-    ? replacePlaceholdersInElement(solutionRoot, (index, answer) =>
+  const answerRoot = root.querySelector(`.${classes.solutionContent}`);
+  const answerMatches = answerRoot
+    ? replacePlaceholdersInElement(answerRoot, (index, answer) =>
         createBlankTag(index, answer),
       )
     : [];
 
-  if (
-    solutionRoot &&
-    problemMatches.length > 0 &&
-    solutionMatches.length === 0
-  ) {
-    insertBlankAnswers(solutionRoot, problemMatches);
+  if (answerRoot && problemMatches.length > 0 && answerMatches.length === 0) {
+    insertBlankAnswers(answerRoot, problemMatches);
   }
 
   bindBlankHighlights(root);

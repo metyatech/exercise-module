@@ -1,2 +1,14 @@
-export { default, Solution } from './theme/Exercise/index.js';
-export type { ExerciseProps, SolutionProps } from './theme/Exercise/index.js';
+export {
+  default,
+  Answer,
+  Hint,
+  QuickCheck,
+  Solution,
+} from './theme/Exercise/index.js';
+export type {
+  AnswerProps,
+  ExerciseProps,
+  HintProps,
+  QuickCheckProps,
+  SolutionProps,
+} from './theme/Exercise/index.js';
