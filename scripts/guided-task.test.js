@@ -319,6 +319,16 @@ assert.ok(
   'regular Answer should be detected as a normal Answer',
 );
 
+const opaqueRscAnswerElement = React.createElement(
+  createClientReference('some-rsc-id#Answer'),
+  null,
+  'Opaque RSC answer',
+);
+assert.ok(
+  isAnswerElement(opaqueRscAnswerElement),
+  'opaque RSC answer should be detected as Answer',
+);
+
 assert.equal(
   ClientExercise,
   Exercise,

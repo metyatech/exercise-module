@@ -11,26 +11,10 @@ const CLIENT_REFERENCE_EXPORTS_BY_MARKER: ReadonlyMap<
   string,
   ReadonlySet<string>
 > = new Map([
-  ['__exerciseAnswer', new Set(['Answer'])],
+  ['__exerciseAnswer', new Set(['Answer', 'Solution'])],
   ['__exerciseHint', new Set(['Hint'])],
   ['__exerciseGuidedTask', new Set(['QuickCheck', 'default'])],
 ]);
-
-const BARE_CLIENT_REFERENCE_EXPORTS_BY_MARKER: ReadonlyMap<
-  string,
-  ReadonlySet<string>
-> = new Map([
-  ['__exerciseAnswer', new Set(['Answer'])],
-  ['__exerciseHint', new Set(['Hint'])],
-]);
-
-function isExercisePackagePath(modulePath: string): boolean {
-  const segments = modulePath.replace(/\\/g, '/').split('/');
-  return segments.some(
-    (segment, index) =>
-      segment === '@metyatech' && segments[index + 1] === 'exercise',
-  );
-}
 
 function matchesExerciseClientReference(
   candidate: MarkableComponent,
@@ -48,17 +32,7 @@ function matchesExerciseClientReference(
 
   const exportName = id.slice(separatorIndex + 1);
   const allowedExports = CLIENT_REFERENCE_EXPORTS_BY_MARKER.get(markerName);
-  if (!allowedExports?.has(exportName)) {
-    return false;
-  }
-
-  if (
-    BARE_CLIENT_REFERENCE_EXPORTS_BY_MARKER.get(markerName)?.has(exportName)
-  ) {
-    return true;
-  }
-
-  return isExercisePackagePath(id.slice(0, separatorIndex));
+  return allowedExports?.has(exportName) ?? false;
 }
 
 export function markExerciseComponent<T extends object>(
