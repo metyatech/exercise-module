@@ -518,7 +518,7 @@ function GuidedTask({
   enableBlanks = false,
   variant = 'exercise',
   componentName = 'Exercise',
-  quickCheckTitle = 'Quick Check',
+  quickCheckTitle = '理解度確認',
 }: GuidedTaskProps): ReactElement {
   useExerciseStyles();
   const rootRef = useRef<HTMLDivElement>(null);

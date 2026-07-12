@@ -83,6 +83,11 @@ assert.match(
   /rensyuQuickCheckTitle/,
   'QuickCheck should render title class',
 );
+assert.match(
+  quickCheckHtml,
+  /理解度確認/,
+  'QuickCheck should render default title',
+);
 assert.match(quickCheckHtml, /答えを見る/, 'should label QuickCheck answer');
 
 const assertStructureError = (element, message, description) => {
