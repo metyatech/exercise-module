@@ -156,6 +156,98 @@ assert.doesNotMatch(
   'pre-evaluated legacy Solution from calling Solution should not require Hint',
 );
 
+const createClientReference = (id) => {
+  const clientReference = () => null;
+  Object.defineProperty(clientReference, '$$id', {
+    value: id,
+  });
+  return clientReference;
+};
+
+// Next/RSC regression: MDX can pass a client-reference function whose only
+// useful identity is a $$id ending in this package's Solution export. The
+// legacy Exercise path must classify it as Solution, not as problem content.
+const clientReferenceSolution = createClientReference(
+  '@metyatech/exercise/dist/client.js#Solution',
+);
+const clientReferenceLegacyHtml = renderToString(
+  React.createElement(
+    Exercise,
+    null,
+    'Problem text before client reference Solution.',
+    React.createElement(
+      clientReferenceSolution,
+      null,
+      'Client reference legacy answer',
+    ),
+  ),
+);
+assert.doesNotMatch(
+  clientReferenceLegacyHtml,
+  /\u30d2\u30f3\u30c8\u3092\u898b\u308b/,
+  'client-reference legacy Exercise must not require Hint',
+);
+assert.match(
+  clientReferenceLegacyHtml,
+  /Problem text before client reference Solution\./,
+  'client-reference legacy Exercise must keep textual problem content',
+);
+assert.match(
+  clientReferenceLegacyHtml,
+  /Client reference legacy answer/,
+  'client-reference legacy Exercise must keep Solution body in answer area',
+);
+assert.ok(
+  !clientReferenceLegacyHtml.includes(
+    'Problem text before client reference Solution.Client reference legacy answer',
+  ),
+  'client-reference legacy Exercise must not inline Solution body into problem area',
+);
+
+assertStructureError(
+  React.createElement(
+    QuickCheck,
+    null,
+    problem,
+    React.createElement(
+      clientReferenceSolution,
+      null,
+      'Client reference legacy answer',
+    ),
+  ),
+  /QuickCheck does not allow legacy Solution/,
+  'QuickCheck should reject client-reference Solution',
+);
+
+assertStructureError(
+  React.createElement(
+    Exercise,
+    null,
+    problem,
+    React.createElement(
+      createClientReference('@example/exercise/dist/client.js#Solution'),
+      null,
+      'Foreign package body',
+    ),
+  ),
+  /at least one Hint is required/,
+  'foreign client-reference Solution should not be treated as legacy Solution',
+);
+assertStructureError(
+  React.createElement(
+    Exercise,
+    null,
+    problem,
+    React.createElement(
+      createClientReference('@metyatech/exercise/dist/client.js#NotSolution'),
+      null,
+      'Wrong export body',
+    ),
+  ),
+  /at least one Hint is required/,
+  'non-Solution export from this package should not be treated as legacy Solution',
+);
+
 const preEvaluatedLegacyHtml = renderToStaticMarkup(
   React.createElement(Exercise, null, problem, preEvaluatedLegacyAnswer),
 );
