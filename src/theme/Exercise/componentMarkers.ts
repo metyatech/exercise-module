@@ -17,6 +17,9 @@ const CLIENT_REFERENCE_EXPORTS_BY_MARKER: ReadonlyMap<
   ['__exerciseGuidedTask', new Set(['QuickCheck', 'default'])],
 ]);
 
+const LEGACY_SOLUTION_MARKER = '__exerciseSolution';
+const LEGACY_SOLUTION_EXPORT = 'Solution';
+
 function isExercisePackagePath(modulePath: string): boolean {
   const segments = modulePath.replace(/\\/g, '/').split('/');
   return segments.some(
@@ -43,6 +46,13 @@ function matchesExerciseClientReference(
   const allowedExports = CLIENT_REFERENCE_EXPORTS_BY_MARKER.get(markerName);
   if (!allowedExports?.has(exportName)) {
     return false;
+  }
+
+  if (
+    markerName === LEGACY_SOLUTION_MARKER &&
+    exportName === LEGACY_SOLUTION_EXPORT
+  ) {
+    return true;
   }
 
   return isExercisePackagePath(id.slice(0, separatorIndex));

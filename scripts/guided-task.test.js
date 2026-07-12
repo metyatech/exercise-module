@@ -176,6 +176,12 @@ const windowsClientReferenceSolution = createClientReference(
 const webpackClientReferenceSolution = createClientReference(
   'webpack://course-docs-site/./node_modules/@metyatech/exercise/dist/client.js#Solution',
 );
+const rscBundledClientReferenceSolution = createClientReference(
+  'webpack-internal:///(rsc)/./node_modules/.../client.js#Solution',
+);
+const opaqueBundledClientReferenceSolution = createClientReference(
+  'some-bundled-id#Solution',
+);
 
 const windowsClientReferenceSolutionElement = React.createElement(
   windowsClientReferenceSolution,
@@ -243,6 +249,52 @@ assert.match(
   'webpack client-reference legacy Exercise must keep Solution body in answer area',
 );
 
+const rscBundledClientReferenceLegacyHtml = renderToString(
+  React.createElement(
+    Exercise,
+    null,
+    'Problem text before RSC bundled client reference Solution.',
+    React.createElement(
+      rscBundledClientReferenceSolution,
+      null,
+      'RSC bundled client reference legacy answer',
+    ),
+  ),
+);
+assert.doesNotMatch(
+  rscBundledClientReferenceLegacyHtml,
+  /\u30d2\u30f3\u30c8\u3092\u898b\u308b/,
+  'RSC bundled client-reference legacy Exercise must not require Hint',
+);
+assert.match(
+  rscBundledClientReferenceLegacyHtml,
+  /RSC bundled client reference legacy answer/,
+  'RSC bundled client-reference legacy Exercise must keep Solution body in answer area',
+);
+
+const opaqueBundledClientReferenceLegacyHtml = renderToString(
+  React.createElement(
+    Exercise,
+    null,
+    'Problem text before opaque bundled client reference Solution.',
+    React.createElement(
+      opaqueBundledClientReferenceSolution,
+      null,
+      'Opaque bundled client reference legacy answer',
+    ),
+  ),
+);
+assert.doesNotMatch(
+  opaqueBundledClientReferenceLegacyHtml,
+  /\u30d2\u30f3\u30c8\u3092\u898b\u308b/,
+  'opaque bundled client-reference legacy Exercise must not require Hint',
+);
+assert.match(
+  opaqueBundledClientReferenceLegacyHtml,
+  /Opaque bundled client reference legacy answer/,
+  'opaque bundled client-reference legacy Exercise must keep Solution body in answer area',
+);
+
 const clientReferenceLegacyHtml = renderToString(
   React.createElement(
     Exercise,
@@ -294,17 +346,17 @@ assertStructureError(
 
 assertStructureError(
   React.createElement(
-    Exercise,
+    QuickCheck,
     null,
     problem,
     React.createElement(
-      createClientReference('@example/exercise/dist/client.js#Solution'),
+      opaqueBundledClientReferenceSolution,
       null,
-      'Foreign package body',
+      'Opaque bundled legacy answer',
     ),
   ),
-  /at least one Hint is required/,
-  'foreign client-reference Solution should not be treated as legacy Solution',
+  /QuickCheck does not allow legacy Solution/,
+  'QuickCheck should reject opaque bundled client-reference Solution',
 );
 assertStructureError(
   React.createElement(
@@ -312,13 +364,13 @@ assertStructureError(
     null,
     problem,
     React.createElement(
-      createClientReference('@metyatech/exercise/dist/client.js#NotSolution'),
+      createClientReference('some-bundled-id#NotSolution'),
       null,
       'Wrong export body',
     ),
   ),
   /at least one Hint is required/,
-  'non-Solution export from this package should not be treated as legacy Solution',
+  'non-Solution bundled export should not be treated as legacy Solution',
 );
 
 const preEvaluatedLegacyHtml = renderToStaticMarkup(
