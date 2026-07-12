@@ -4,6 +4,7 @@ import React, {
   type ReactNode,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -11,6 +12,7 @@ import { type AnswerProps } from './Answer.js';
 import {
   AnswerRegistrationContext,
   type AnswerRegistrationAction,
+  type AnswerRegistrationContextValue,
   type AnswerRegistrationPayload,
 } from './answerContext.js';
 import {
@@ -299,6 +301,7 @@ type GuidedTaskVariant = 'exercise' | 'quickCheck';
 type ExtractedChildren = {
   answerContent: ReactNode;
   hintChildren: ReactElement<HintProps>[];
+  legacyRegistrationMode: boolean;
   problemChildren: ReactNode[];
 };
 
@@ -403,6 +406,14 @@ function isNestedGuidedTaskElement(child: ReactNode): boolean {
   );
 }
 
+function isDetectablyNonSolutionClientReference(child: ReactNode): boolean {
+  if (!React.isValidElement(child) || isLegacySolutionElement(child)) {
+    return false;
+  }
+  const type = child.type as { $$id?: unknown };
+  return typeof type.$$id === 'string' && type.$$id.includes('#');
+}
+
 function getOrderLabel(child: ReactNode): string {
   if (isAnswerElement(child)) {
     return 'Answer';
@@ -491,6 +502,7 @@ function extractLegacySolutionChildren(
   return {
     answerContent: legacyAnswerContent,
     hintChildren: [],
+    legacyRegistrationMode: false,
     problemChildren,
   };
 }
@@ -658,6 +670,19 @@ function extractGuidedTaskChildren(
       'problem content is required',
     );
   }
+  if (
+    componentName === 'Exercise' &&
+    hintChildren.length === 0 &&
+    answerChildren.length === 0 &&
+    !childrenArray.some(isDetectablyNonSolutionClientReference)
+  ) {
+    return {
+      answerContent: null,
+      hintChildren: [],
+      legacyRegistrationMode: true,
+      problemChildren,
+    };
+  }
   if (hintChildren.length < 1) {
     throw createStructureError(
       componentName,
@@ -702,6 +727,7 @@ function extractGuidedTaskChildren(
   return {
     answerContent,
     hintChildren,
+    legacyRegistrationMode: false,
     problemChildren,
   };
 }
@@ -723,6 +749,7 @@ function GuidedTask({
   const {
     answerContent: detectedAnswerContent,
     hintChildren,
+    legacyRegistrationMode,
     problemChildren,
   } = extractGuidedTaskChildren(children, componentName);
   const [registeredAnswer, setRegisteredAnswer] = useState<ReactNode | null>(
@@ -733,6 +760,13 @@ function GuidedTask({
       applyAnswerRegistration(current, toAnswerRegistrationAction(payload)),
     );
   }, []);
+  const answerRegistration = useMemo<AnswerRegistrationContextValue>(
+    () => ({
+      allowLegacySolutionRegistration: legacyRegistrationMode,
+      registerAnswer,
+    }),
+    [legacyRegistrationMode, registerAnswer],
+  );
   const answerContent = detectedAnswerContent ?? registeredAnswer;
 
   useEffect(() => {
@@ -758,7 +792,7 @@ function GuidedTask({
     answerTitle ?? (variant === 'quickCheck' ? '答えを見る' : '解答を見る');
 
   return (
-    <AnswerRegistrationContext.Provider value={registerAnswer}>
+    <AnswerRegistrationContext.Provider value={answerRegistration}>
       <div className={sectionClassName} ref={rootRef}>
         {variant === 'quickCheck' && (
           <div className={classes.quickCheckTitle}>{quickCheckTitle}</div>

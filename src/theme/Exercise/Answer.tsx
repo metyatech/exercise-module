@@ -29,28 +29,44 @@ function ExerciseAnswer({
   children,
   [LEGACY_SOLUTION_MARKER]: isLegacySolution,
 }: InternalAnswerProps): ReactElement {
-  const registerAnswer = useContext(AnswerRegistrationContext);
+  const answerRegistrationInput = useContext(AnswerRegistrationContext);
+  const answerRegistration =
+    typeof answerRegistrationInput === 'function'
+      ? {
+          allowLegacySolutionRegistration: false,
+          registerAnswer: answerRegistrationInput,
+        }
+      : answerRegistrationInput;
 
   useEffect(() => {
-    if (!registerAnswer) {
+    if (!answerRegistration) {
       return;
     }
-    if (isLegacySolution) {
+    if (
+      isLegacySolution &&
+      !answerRegistration.allowLegacySolutionRegistration
+    ) {
       return;
     }
-    registerAnswer({
+    answerRegistration.registerAnswer({
       __exerciseAnswerAction: 'set',
       content: children,
     });
     return () => {
-      registerAnswer({
+      answerRegistration.registerAnswer({
         __exerciseAnswerAction: 'clear',
         content: children,
       });
     };
-  }, [children, isLegacySolution, registerAnswer]);
+  }, [answerRegistration, children, isLegacySolution]);
 
-  if (registerAnswer) {
+  if (answerRegistration) {
+    if (
+      isLegacySolution &&
+      !answerRegistration.allowLegacySolutionRegistration
+    ) {
+      throw new Error('legacy Solution cannot be mixed with Hint or Answer');
+    }
     return <></>;
   }
   return <>{children}</>;

@@ -11,5 +11,14 @@ export type AnswerRegistrationPayload =
 
 export type AnswerRegistration = (payload: AnswerRegistrationPayload) => void;
 
+export type AnswerRegistrationContextValue = {
+  allowLegacySolutionRegistration: boolean;
+  registerAnswer: AnswerRegistration;
+};
+
+export type AnswerRegistrationContextInput =
+  | AnswerRegistration
+  | AnswerRegistrationContextValue;
+
 export const AnswerRegistrationContext =
-  React.createContext<AnswerRegistration | null>(null);
+  React.createContext<AnswerRegistrationContextInput | null>(null);

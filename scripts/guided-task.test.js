@@ -164,6 +164,9 @@ const createClientReference = (id) => {
   return clientReference;
 };
 
+const UndetectableLegacySolution = ({ children }) =>
+  React.createElement(Solution, null, children);
+
 // Next/RSC regression: MDX can pass a client-reference function whose only
 // useful identity is a $$id ending in this package's Solution export. The
 // legacy Exercise path must classify it as Solution, not as problem content.
@@ -371,6 +374,21 @@ assertStructureError(
   ),
   /at least one Hint is required/,
   'non-Solution bundled export should not be treated as legacy Solution',
+);
+
+assertStructureError(
+  React.createElement(
+    QuickCheck,
+    null,
+    'QuickCheck problem without new-format children.',
+    React.createElement(
+      UndetectableLegacySolution,
+      null,
+      'Undetectable QuickCheck legacy answer',
+    ),
+  ),
+  /at least one Hint is required/,
+  'QuickCheck should not enter legacy context-registration mode',
 );
 
 const preEvaluatedLegacyHtml = renderToStaticMarkup(
@@ -679,6 +697,25 @@ assertStructureError(
   ),
   /legacy Solution cannot be mixed with Hint or Answer/,
 );
+assert.throws(
+  () =>
+    renderToString(
+      React.createElement(
+        Exercise,
+        null,
+        'Problem before undetectable mixed legacy Solution.',
+        React.createElement(
+          UndetectableLegacySolution,
+          null,
+          'Undetectable mixed legacy answer',
+        ),
+        hint,
+        answer,
+      ),
+    ),
+  /legacy Solution cannot be mixed with Hint or Answer/,
+  'undetectable legacy Solution should still reject mixed new-format Exercise',
+);
 assertStructureError(
   React.createElement(Exercise, null, problem, answer),
   /at least one Hint is required/,
@@ -780,6 +817,43 @@ const root = dom.window.document.getElementById('root');
 assert.ok(root, 'root should exist');
 
 const reactRoot = createRoot(root);
+await act(async () => {
+  reactRoot.render(
+    React.createElement(
+      Exercise,
+      null,
+      'Problem text before undetectable legacy Solution.',
+      React.createElement(
+        UndetectableLegacySolution,
+        null,
+        'Undetectable legacy answer body',
+      ),
+    ),
+  );
+});
+await act(async () => {});
+
+assert.match(
+  root.querySelector('.rensyuNaiyou')?.textContent ?? '',
+  /Problem text before undetectable legacy Solution\./,
+  'undetectable legacy fallback should keep problem content',
+);
+assert.doesNotMatch(
+  root.querySelector('.rensyuNaiyou')?.textContent ?? '',
+  /Undetectable legacy answer body/,
+  'undetectable legacy fallback must not render answer in problem area',
+);
+assert.match(
+  root.querySelector('.rensyuKaitouNaiyou')?.textContent ?? '',
+  /Undetectable legacy answer body/,
+  'undetectable legacy fallback should register answer content',
+);
+assert.equal(
+  root.querySelectorAll('.rensyuHint').length,
+  0,
+  'undetectable legacy fallback should not require Hint',
+);
+
 await act(async () => {
   reactRoot.render(
     React.createElement(
