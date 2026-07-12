@@ -96,8 +96,7 @@ Use `opacity`.
 </Exercise>
 ```
 
-`answerTitle` changes the answer toggle label. The old `solutionTitle` prop is
-temporarily accepted for migration, but new code should use `answerTitle`.
+`answerTitle` changes the answer toggle label.
 
 ### Fill-in-the-blank inputs
 
@@ -120,27 +119,6 @@ The correct value is `${alpha}`.
 </Exercise>
 ```
 
-## Deprecated Phase 1 migration adapter
-
-`Solution` is still exported temporarily so existing exercises can migrate in
-two steps. It is only valid as the final direct child of `Exercise` with problem
-content before it and no `Hint` or `Answer` children.
-
-```mdx
-import Exercise, { Solution } from '@metyatech/exercise/client';
-
-<Exercise>
-Legacy problem text.
-
-<Solution>
-Legacy answer text.
-</Solution>
-</Exercise>
-```
-
-`QuickCheck` never accepts `Solution`, and new `Hint`/`Answer` children cannot
-be mixed with legacy `Solution`.
-
 ## Component Props
 
 ### Exercise
@@ -148,7 +126,6 @@ be mixed with legacy `Solution`.
 - `children` (required): Problem content, one or more `Hint` children, and one
   `Answer` child.
 - `answerTitle`: Label for the answer toggle (default: `解答を見る`).
-- `solutionTitle` (deprecated): Temporary alias for `answerTitle`.
 - `enableBlanks`: Enable placeholder processing (default: `false`).
 
 ### QuickCheck
@@ -167,10 +144,6 @@ be mixed with legacy `Solution`.
 ### Answer
 
 - `children` (required): Answer content to show when expanded.
-
-### Solution (deprecated)
-
-- `children` (required): Legacy answer content for Phase 1 migration only.
 
 ## Styling
 

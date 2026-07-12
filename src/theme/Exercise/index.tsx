@@ -3,7 +3,6 @@ import Answer, { type AnswerProps } from './Answer.js';
 import GuidedTask from './GuidedTask.js';
 import Hint, { type HintProps } from './Hint.js';
 import QuickCheck, { type QuickCheckProps } from './QuickCheck.js';
-import Solution, { type SolutionProps } from './Solution.js';
 import { markExerciseComponent } from './componentMarkers.js';
 
 export interface ExerciseProps {
@@ -11,8 +10,6 @@ export interface ExerciseProps {
   children: ReactNode;
   /** 解答欄の見出し */
   answerTitle?: string;
-  /** @deprecated Use answerTitle instead. */
-  solutionTitle?: string;
   /** 穴埋め置換を有効化 */
   enableBlanks?: boolean;
 }
@@ -20,12 +17,11 @@ export interface ExerciseProps {
 function Exercise({
   children,
   answerTitle,
-  solutionTitle,
   enableBlanks = false,
 }: ExerciseProps): ReactElement {
   return (
     <GuidedTask
-      answerTitle={answerTitle ?? solutionTitle}
+      answerTitle={answerTitle}
       componentName="Exercise"
       enableBlanks={enableBlanks}
       variant="exercise"
@@ -42,5 +38,5 @@ const markedExercise = markExerciseComponent(
 );
 
 export default markedExercise;
-export { Answer, Hint, QuickCheck, Solution };
-export type { AnswerProps, HintProps, QuickCheckProps, SolutionProps };
+export { Answer, Hint, QuickCheck };
+export type { AnswerProps, HintProps, QuickCheckProps };

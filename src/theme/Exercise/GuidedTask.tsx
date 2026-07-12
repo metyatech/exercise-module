@@ -2,25 +2,11 @@ import React, {
   Children,
   type ReactElement,
   type ReactNode,
-  useCallback,
   useEffect,
-  useMemo,
   useRef,
-  useState,
 } from 'react';
 import { type AnswerProps } from './Answer.js';
-import {
-  AnswerRegistrationContext,
-  type AnswerRegistrationAction,
-  type AnswerRegistrationContextValue,
-  type AnswerRegistrationPayload,
-} from './answerContext.js';
-import {
-  findLegacySolutionDeep,
-  getFlatChildrenForLegacyDetection,
-  isAnswerElement,
-  isLegacySolutionElement,
-} from './answerDetection.js';
+import { isAnswerElement } from './answerDetection.js';
 import { startBlankPlaceholderObserver } from './blanks.js';
 import { exerciseClasses as classes } from './classes.js';
 import {
@@ -29,7 +15,6 @@ import {
 } from './componentMarkers.js';
 import { type HintProps } from './Hint.js';
 import { isHintElement } from './hintDetection.js';
-import { type SolutionProps } from './Solution.js';
 
 const STYLE_ELEMENT_ID = 'metyatech-exercise-style';
 const GUIDED_TASK_COMPONENT_NAME = 'GuidedTask';
@@ -301,7 +286,6 @@ type GuidedTaskVariant = 'exercise' | 'quickCheck';
 type ExtractedChildren = {
   answerContent: ReactNode;
   hintChildren: ReactElement<HintProps>[];
-  legacyRegistrationMode: boolean;
   problemChildren: ReactNode[];
 };
 
@@ -336,29 +320,6 @@ function useExerciseStyles(): void {
     document.head.appendChild(styleElement);
   }, []);
 }
-
-const toAnswerRegistrationAction = (
-  payload: AnswerRegistrationPayload,
-): AnswerRegistrationAction => {
-  if (
-    payload &&
-    typeof payload === 'object' &&
-    '__exerciseAnswerAction' in payload
-  ) {
-    return payload as AnswerRegistrationAction;
-  }
-  return { __exerciseAnswerAction: 'set', content: payload };
-};
-
-const applyAnswerRegistration = (
-  current: ReactNode | null,
-  action: AnswerRegistrationAction,
-): ReactNode | null => {
-  if (action.__exerciseAnswerAction === 'clear') {
-    return current === action.content ? null : current;
-  }
-  return current ?? action.content;
-};
 
 function hasMeaningfulContent(child: ReactNode): boolean {
   if (child === null || child === undefined || typeof child === 'boolean') {
@@ -406,23 +367,12 @@ function isNestedGuidedTaskElement(child: ReactNode): boolean {
   );
 }
 
-function isDetectablyNonSolutionClientReference(child: ReactNode): boolean {
-  if (!React.isValidElement(child) || isLegacySolutionElement(child)) {
-    return false;
-  }
-  const type = child.type as { $$id?: unknown };
-  return typeof type.$$id === 'string' && type.$$id.includes('#');
-}
-
 function getOrderLabel(child: ReactNode): string {
   if (isAnswerElement(child)) {
     return 'Answer';
   }
   if (isHintElement(child)) {
     return 'Hint';
-  }
-  if (isLegacySolutionElement(child)) {
-    return 'Solution';
   }
   if (isNestedGuidedTaskElement(child)) {
     return getElementDisplayName(child) ?? 'GuidedTask';
@@ -442,129 +392,6 @@ function createStructureError(
   );
 }
 
-function extractLegacySolutionChildren(
-  componentName: string,
-  childrenArray: ReactNode[],
-): ExtractedChildren {
-  const expectedOrder = 'problem content, then Solution';
-  const solutionChildren = childrenArray.filter(isLegacySolutionElement);
-  const answerChildren = childrenArray.filter(isAnswerElement);
-  const hintChildren = childrenArray.filter(isHintElement);
-
-  if (solutionChildren.length !== 1) {
-    throw createStructureError(
-      componentName,
-      childrenArray,
-      expectedOrder,
-      'legacy Exercise requires exactly one Solution',
-    );
-  }
-  if (answerChildren.length > 0 || hintChildren.length > 0) {
-    throw createStructureError(
-      componentName,
-      childrenArray,
-      expectedOrder,
-      'legacy Solution cannot be mixed with Hint or Answer',
-    );
-  }
-
-  const solutionChild = solutionChildren[0];
-  const solutionIndex = childrenArray.indexOf(solutionChild);
-  if (solutionIndex !== childrenArray.length - 1) {
-    throw createStructureError(
-      componentName,
-      childrenArray,
-      expectedOrder,
-      'legacy Solution must be the last child',
-    );
-  }
-
-  const problemChildren = childrenArray.slice(0, solutionIndex);
-  if (!problemChildren.some(hasMeaningfulContent)) {
-    throw createStructureError(
-      componentName,
-      childrenArray,
-      expectedOrder,
-      'problem content is required before Solution',
-    );
-  }
-
-  const legacyAnswerContent = (solutionChild.props as SolutionProps).children;
-  if (!hasMeaningfulContent(legacyAnswerContent)) {
-    throw createStructureError(
-      componentName,
-      childrenArray,
-      expectedOrder,
-      'Solution content must not be empty',
-    );
-  }
-
-  return {
-    answerContent: legacyAnswerContent,
-    hintChildren: [],
-    legacyRegistrationMode: false,
-    problemChildren,
-  };
-}
-
-/**
- * Locate the legacy Solution in the children tree using both direct-child
- * detection (Pass 1) and a deep, fragment-flattening scan (Pass 2). Pass 2 is
- * the robustness layer for real MDX/SSR builds that may wrap the legacy
- * Solution in intermediate Fragment-like elements (e.g. MDX layout
- * artifacts) before it reaches the `<Exercise>` boundary.
- *
- * Pass 2 deliberately refuses to wrap meaningful structural children
- * (Hint/Answer/Solution-wrappers) — it only descends through transparent
- * wrappers so misclassification cannot happen.
- *
- * Returns a discriminated union covering all deep-scan outcomes (found,
- * ambiguous multiple matches, none found) so callers can surface accurate
- * error messages instead of falling back to the unrelated "missing Hint"
- * message.
- */
-function locateLegacySolution(
-  rawChildren: ReactNode,
-  childrenArray: ReactNode[],
-):
-  | {
-      kind: 'single';
-      childrenArray: ReactNode[];
-      legacyElement: ReactElement<SolutionProps>;
-    }
-  | { kind: 'ambiguous'; total: number }
-  | null {
-  const directMatches = childrenArray.filter(isLegacySolutionElement);
-  if (directMatches.length === 1) {
-    return {
-      kind: 'single',
-      childrenArray,
-      legacyElement: directMatches[0] as ReactElement<SolutionProps>,
-    };
-  }
-
-  // Pass 2: deep scan through transparent wrappers (MDX/SSR artifacts).
-  const deepMatch = findLegacySolutionDeep(rawChildren);
-  if (!deepMatch) {
-    return null;
-  }
-
-  const flat =
-    getFlatChildrenForLegacyDetection(rawChildren).filter(hasMeaningfulContent);
-  const flatLegacyMatches = flat.filter(isLegacySolutionElement);
-  if (flatLegacyMatches.length !== 1) {
-    return {
-      kind: 'ambiguous',
-      total: flatLegacyMatches.length,
-    };
-  }
-  return {
-    kind: 'single',
-    childrenArray: flat,
-    legacyElement: deepMatch.element,
-  };
-}
-
 function extractGuidedTaskChildren(
   children: ReactNode,
   componentName: 'Exercise' | 'QuickCheck',
@@ -581,43 +408,6 @@ function extractGuidedTaskChildren(
       expectedOrder,
       'nested Exercise or QuickCheck is not allowed',
     );
-  }
-
-  // Pass 1: legacy Solution detected among direct children.
-  // Pass 2: legacy Solution found through transparent wrapper descent
-  //   (MDX/SSR artifact compatibility).
-  const directLegacyChildren = childrenArray.filter(isLegacySolutionElement);
-  const deepLegacyDiscovered =
-    directLegacyChildren.length === 0
-      ? locateLegacySolution(children, childrenArray)
-      : null;
-
-  if (directLegacyChildren.length > 0 || deepLegacyDiscovered !== null) {
-    if (componentName !== 'Exercise') {
-      throw createStructureError(
-        componentName,
-        childrenArray,
-        expectedOrder,
-        'QuickCheck does not allow legacy Solution',
-      );
-    }
-    if (deepLegacyDiscovered) {
-      if (deepLegacyDiscovered.kind === 'ambiguous') {
-        throw createStructureError(
-          componentName,
-          getFlatChildrenForLegacyDetection(children).filter(
-            hasMeaningfulContent,
-          ),
-          expectedOrder,
-          `legacy Exercise requires exactly one Solution (found ${deepLegacyDiscovered.total})`,
-        );
-      }
-      return extractLegacySolutionChildren(
-        componentName,
-        deepLegacyDiscovered.childrenArray,
-      );
-    }
-    return extractLegacySolutionChildren(componentName, childrenArray);
   }
 
   const answerChildren = childrenArray.filter(isAnswerElement);
@@ -670,19 +460,6 @@ function extractGuidedTaskChildren(
       'problem content is required',
     );
   }
-  if (
-    componentName === 'Exercise' &&
-    hintChildren.length === 0 &&
-    answerChildren.length === 0 &&
-    !childrenArray.some(isDetectablyNonSolutionClientReference)
-  ) {
-    return {
-      answerContent: null,
-      hintChildren: [],
-      legacyRegistrationMode: true,
-      problemChildren,
-    };
-  }
   if (hintChildren.length < 1) {
     throw createStructureError(
       componentName,
@@ -727,7 +504,6 @@ function extractGuidedTaskChildren(
   return {
     answerContent,
     hintChildren,
-    legacyRegistrationMode: false,
     problemChildren,
   };
 }
@@ -749,25 +525,8 @@ function GuidedTask({
   const {
     answerContent: detectedAnswerContent,
     hintChildren,
-    legacyRegistrationMode,
     problemChildren,
   } = extractGuidedTaskChildren(children, componentName);
-  const [registeredAnswer, setRegisteredAnswer] = useState<ReactNode | null>(
-    null,
-  );
-  const registerAnswer = useCallback((payload: AnswerRegistrationPayload) => {
-    setRegisteredAnswer((current) =>
-      applyAnswerRegistration(current, toAnswerRegistrationAction(payload)),
-    );
-  }, []);
-  const answerRegistration = useMemo<AnswerRegistrationContextValue>(
-    () => ({
-      allowLegacySolutionRegistration: legacyRegistrationMode,
-      registerAnswer,
-    }),
-    [legacyRegistrationMode, registerAnswer],
-  );
-  const answerContent = detectedAnswerContent ?? registeredAnswer;
 
   useEffect(() => {
     if (!enableBlanks) {
@@ -792,26 +551,24 @@ function GuidedTask({
     answerTitle ?? (variant === 'quickCheck' ? '答えを見る' : '解答を見る');
 
   return (
-    <AnswerRegistrationContext.Provider value={answerRegistration}>
-      <div className={sectionClassName} ref={rootRef}>
-        {variant === 'quickCheck' && (
-          <div className={classes.quickCheckTitle}>{quickCheckTitle}</div>
-        )}
-        <div className={classes.content}>{problemChildren}</div>
-        {hintChildren.map((hintChild, index) => (
-          <details className={classes.hint} key={hintChild.key ?? index}>
-            <summary>{getHintTitle(index, hintChildren.length)}</summary>
-            <div className={classes.hintContent}>
-              {(hintChild.props as HintProps).children}
-            </div>
-          </details>
-        ))}
-        <details className={classes.solution}>
-          <summary>{resolvedAnswerTitle}</summary>
-          <div className={classes.solutionContent}>{answerContent}</div>
+    <div className={sectionClassName} ref={rootRef}>
+      {variant === 'quickCheck' && (
+        <div className={classes.quickCheckTitle}>{quickCheckTitle}</div>
+      )}
+      <div className={classes.content}>{problemChildren}</div>
+      {hintChildren.map((hintChild, index) => (
+        <details className={classes.hint} key={hintChild.key ?? index}>
+          <summary>{getHintTitle(index, hintChildren.length)}</summary>
+          <div className={classes.hintContent}>
+            {(hintChild.props as HintProps).children}
+          </div>
         </details>
-      </div>
-    </AnswerRegistrationContext.Provider>
+      ))}
+      <details className={classes.solution}>
+        <summary>{resolvedAnswerTitle}</summary>
+        <div className={classes.solutionContent}>{detectedAnswerContent}</div>
+      </details>
+    </div>
   );
 }
 

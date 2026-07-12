@@ -12,7 +12,6 @@ export type AnswerRegistrationPayload =
 export type AnswerRegistration = (payload: AnswerRegistrationPayload) => void;
 
 export type AnswerRegistrationContextValue = {
-  allowLegacySolutionRegistration: boolean;
   registerAnswer: AnswerRegistration;
 };
 

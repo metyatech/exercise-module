@@ -11,20 +11,15 @@ const CLIENT_REFERENCE_EXPORTS_BY_MARKER: ReadonlyMap<
   string,
   ReadonlySet<string>
 > = new Map([
-  ['__exerciseSolution', new Set(['Solution'])],
   ['__exerciseAnswer', new Set(['Answer'])],
   ['__exerciseHint', new Set(['Hint'])],
   ['__exerciseGuidedTask', new Set(['QuickCheck', 'default'])],
 ]);
 
-const LEGACY_SOLUTION_MARKER = '__exerciseSolution';
-const LEGACY_SOLUTION_EXPORT = 'Solution';
-
 const BARE_CLIENT_REFERENCE_EXPORTS_BY_MARKER: ReadonlyMap<
   string,
   ReadonlySet<string>
 > = new Map([
-  [LEGACY_SOLUTION_MARKER, new Set([LEGACY_SOLUTION_EXPORT])],
   ['__exerciseAnswer', new Set(['Answer'])],
   ['__exerciseHint', new Set(['Hint'])],
 ]);

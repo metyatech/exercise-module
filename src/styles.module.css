@@ -1,5 +1,5 @@
 /* 解答セクション全体の見た目 */
-.exerciseSolution {
+.exerciseAnswer {
   border: 1px solid var(--ifm-color-emphasis-300);
   border-radius: var(--ifm-border-radius);
   padding: var(--ifm-alert-padding-vertical) var(--ifm-alert-padding-horizontal);
@@ -8,7 +8,7 @@
   box-shadow: var(--ifm-global-shadow-lw);
 }
 
-.exerciseSolution > summary {
+.exerciseAnswer > summary {
   font-weight: var(--ifm-font-weight-bold);
   color: var(--ifm-color-primary-dark);
   cursor: pointer;
@@ -20,11 +20,11 @@
   padding-left: 1.5rem;
 }
 
-.exerciseSolution > summary::-webkit-details-marker {
+.exerciseAnswer > summary::-webkit-details-marker {
   display: none;
 }
 
-.exerciseSolution > summary::before {
+.exerciseAnswer > summary::before {
   content: '▶';
   position: absolute;
   left: 0;
@@ -34,25 +34,25 @@
   transition: transform 0.2s ease;
 }
 
-.exerciseSolution[open] > summary::before {
+.exerciseAnswer[open] > summary::before {
   transform: rotate(90deg);
 }
 
-[data-theme='dark'] .exerciseSolution > summary {
+[data-theme='dark'] .exerciseAnswer > summary {
   color: var(--ifm-color-primary-light);
 }
 
-.exerciseSolution > summary:hover {
+.exerciseAnswer > summary:hover {
   color: var(--ifm-color-primary);
 }
 
-.exerciseSolutionContent {
+.exerciseAnswerContent {
   margin-top: var(--ifm-spacing-vertical);
   padding-top: var(--ifm-spacing-vertical);
   border-top: 1px solid var(--ifm-color-emphasis-300);
 }
 
-.exerciseSolution::details-content {
+.exerciseAnswer::details-content {
   transition:
     height 306ms ease-in-out,
     content-visibility 306ms allow-discrete;
@@ -61,7 +61,7 @@
   height: 0;
 }
 
-.exerciseSolution[open]::details-content {
+.exerciseAnswer[open]::details-content {
   height: auto;
 }
 
