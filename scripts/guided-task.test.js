@@ -185,6 +185,18 @@ const rscBundledClientReferenceSolution = createClientReference(
 const opaqueBundledClientReferenceSolution = createClientReference(
   'some-bundled-id#Solution',
 );
+const rscBundledClientReferenceHint = createClientReference(
+  'webpack-internal:///(rsc)/./node_modules/.../client.js#Hint',
+);
+const rscBundledClientReferenceAnswer = createClientReference(
+  'webpack-internal:///(rsc)/./node_modules/.../client.js#Answer',
+);
+const opaqueBundledClientReferenceHint = createClientReference(
+  'some-bundled-id#Hint',
+);
+const opaqueBundledClientReferenceAnswer = createClientReference(
+  'some-bundled-id#Answer',
+);
 
 const windowsClientReferenceSolutionElement = React.createElement(
   windowsClientReferenceSolution,
@@ -360,6 +372,111 @@ assertStructureError(
   ),
   /QuickCheck does not allow legacy Solution/,
   'QuickCheck should reject opaque bundled client-reference Solution',
+);
+
+const rscBundledClientReferenceQuickCheckHtml = renderToString(
+  React.createElement(
+    QuickCheck,
+    null,
+    'QuickCheck problem before RSC bundled client references.',
+    React.createElement(
+      rscBundledClientReferenceHint,
+      null,
+      'RSC bundled client reference hint',
+    ),
+    React.createElement(
+      rscBundledClientReferenceAnswer,
+      null,
+      'RSC bundled client reference answer',
+    ),
+  ),
+);
+assert.match(
+  rscBundledClientReferenceQuickCheckHtml,
+  /QuickCheck problem before RSC bundled client references\./,
+  'QuickCheck should render problem content before RSC bundled Hint/Answer refs',
+);
+assert.match(
+  rscBundledClientReferenceQuickCheckHtml,
+  /RSC bundled client reference hint/,
+  'QuickCheck should render RSC bundled client-reference Hint content',
+);
+assert.match(
+  rscBundledClientReferenceQuickCheckHtml,
+  /RSC bundled client reference answer/,
+  'QuickCheck should render RSC bundled client-reference Answer content',
+);
+
+const opaqueBundledClientReferenceQuickCheckHtml = renderToString(
+  React.createElement(
+    QuickCheck,
+    null,
+    'QuickCheck problem before opaque bundled client references.',
+    React.createElement(
+      opaqueBundledClientReferenceHint,
+      null,
+      'Opaque bundled client reference hint',
+    ),
+    React.createElement(
+      opaqueBundledClientReferenceAnswer,
+      null,
+      'Opaque bundled client reference answer',
+    ),
+  ),
+);
+assert.match(
+  opaqueBundledClientReferenceQuickCheckHtml,
+  /QuickCheck problem before opaque bundled client references\./,
+  'QuickCheck should render problem content before opaque bundled Hint/Answer refs',
+);
+assert.match(
+  opaqueBundledClientReferenceQuickCheckHtml,
+  /Opaque bundled client reference hint/,
+  'QuickCheck should render opaque bundled client-reference Hint content',
+);
+assert.match(
+  opaqueBundledClientReferenceQuickCheckHtml,
+  /Opaque bundled client reference answer/,
+  'QuickCheck should render opaque bundled client-reference Answer content',
+);
+
+assertStructureError(
+  React.createElement(
+    QuickCheck,
+    null,
+    'QuickCheck problem before non-matching Hint export.',
+    React.createElement(
+      createClientReference('some-bundled-id#NotHint'),
+      null,
+      'Wrong hint export body',
+    ),
+    React.createElement(
+      opaqueBundledClientReferenceAnswer,
+      null,
+      'Answer still detected',
+    ),
+  ),
+  /at least one Hint is required/,
+  'non-Hint bundled export should not be treated as Hint',
+);
+assertStructureError(
+  React.createElement(
+    QuickCheck,
+    null,
+    'QuickCheck problem before non-matching Answer export.',
+    React.createElement(
+      createClientReference('some-bundled-id#NotAnswer'),
+      null,
+      'Wrong answer export body',
+    ),
+    React.createElement(
+      opaqueBundledClientReferenceHint,
+      null,
+      'Hint still detected',
+    ),
+  ),
+  /exactly one Answer is required/,
+  'non-Answer bundled export should not be treated as Answer',
 );
 assertStructureError(
   React.createElement(

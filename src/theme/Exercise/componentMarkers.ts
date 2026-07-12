@@ -20,6 +20,15 @@ const CLIENT_REFERENCE_EXPORTS_BY_MARKER: ReadonlyMap<
 const LEGACY_SOLUTION_MARKER = '__exerciseSolution';
 const LEGACY_SOLUTION_EXPORT = 'Solution';
 
+const BARE_CLIENT_REFERENCE_EXPORTS_BY_MARKER: ReadonlyMap<
+  string,
+  ReadonlySet<string>
+> = new Map([
+  [LEGACY_SOLUTION_MARKER, new Set([LEGACY_SOLUTION_EXPORT])],
+  ['__exerciseAnswer', new Set(['Answer'])],
+  ['__exerciseHint', new Set(['Hint'])],
+]);
+
 function isExercisePackagePath(modulePath: string): boolean {
   const segments = modulePath.replace(/\\/g, '/').split('/');
   return segments.some(
@@ -49,8 +58,7 @@ function matchesExerciseClientReference(
   }
 
   if (
-    markerName === LEGACY_SOLUTION_MARKER &&
-    exportName === LEGACY_SOLUTION_EXPORT
+    BARE_CLIENT_REFERENCE_EXPORTS_BY_MARKER.get(markerName)?.has(exportName)
   ) {
     return true;
   }
