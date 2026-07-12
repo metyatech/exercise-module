@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import React, { act } from 'react';
 import { JSDOM } from 'jsdom';
 import { createRoot } from 'react-dom/client';
-import { renderToStaticMarkup } from 'react-dom/server';
+import { renderToStaticMarkup, renderToString } from 'react-dom/server';
 import Exercise, {
   Answer,
   Hint,
@@ -178,6 +178,216 @@ assert.match(
   preEvaluatedLegacyHtml,
   /rensyuKaitouNaiyou/,
   'pre-evaluated legacy Answer should preserve answer content class contract',
+);
+
+// Site MDX/SSR regression: legacy Exercise with textual problem + Solution
+// content (the exact failure shape that motivated this fix) must render
+// without Hint and must not leak solution body into problem content. We
+// must hit the SSR rendering path because the prior marker fix only
+// covered the client-side evaluate-as-function shape and not real
+// MDX/SSR builds where React renders the legacy Solution component.
+const siteLegacyHtml = renderToString(
+  React.createElement(
+    Exercise,
+    null,
+    'Problem statement as plain MDX text.',
+    React.createElement(Solution, null, 'Legacy answer body'),
+  ),
+);
+assert.doesNotMatch(
+  siteLegacyHtml,
+  /\u30d2\u30f3\u30c8\u3092\u898b\u308b/,
+  'site-MDX legacy Exercise must not require Hint',
+);
+assert.match(
+  siteLegacyHtml,
+  /Problem statement as plain MDX text\./,
+  'site-MDX legacy Exercise must keep textual problem content',
+);
+assert.match(
+  siteLegacyHtml,
+  /Legacy answer body/,
+  'site-MDX legacy Exercise must keep answer body in answer area',
+);
+assert.ok(
+  !siteLegacyHtml.includes(
+    'rensyuNaiyou">Problem statement as plain MDX text.Legacy answer body',
+  ),
+  'site-MDX legacy Exercise must not inline solution body into problem area',
+);
+
+// Site MDX/SSR regression: Solution wrapped in a React Fragment (a real
+// MDX/SSR artifact between <Exercise> and <Solution>). This emulates the
+// failure where pre-render validation sees the Solution children as
+// additional "problem content" children producing
+//   "Actual order: problem content > problem content"
+// even though the legacy Solution is intended.
+const fragmentWrappedLegacyHtml = renderToString(
+  React.createElement(
+    Exercise,
+    null,
+    React.createElement(
+      'p',
+      null,
+      'Problem statement wrapped together with the legacy Solution.',
+    ),
+    React.createElement(
+      React.Fragment,
+      null,
+      React.createElement(Solution, null, 'Legacy answer in a Fragment'),
+    ),
+  ),
+);
+assert.match(
+  fragmentWrappedLegacyHtml,
+  /Problem statement wrapped together with the legacy Solution\./,
+  'Fragment-wrapped legacy Exercise must keep textual problem content',
+);
+assert.match(
+  fragmentWrappedLegacyHtml,
+  /Legacy answer in a Fragment/,
+  'Fragment-wrapped legacy Exercise must keep answer body in answer area',
+);
+assert.doesNotMatch(
+  fragmentWrappedLegacyHtml,
+  /\u30d2\u30f3\u30c8\u3092\u898b\u308b/,
+  'Fragment-wrapped legacy Exercise must not require Hint',
+);
+assert.ok(
+  !fragmentWrappedLegacyHtml.includes(
+    'Legacy answer in a FragmentProblem statement',
+  ) &&
+    !fragmentWrappedLegacyHtml.includes(
+      'Problem statement wrapped together with the legacy Solution.Legacy answer',
+    ),
+  'Fragment-wrapped legacy Exercise must not inline solution body into problem area',
+);
+
+// Site MDX/SSR regression: deeply nested Fragment wrappers around Solution.
+// Real MDX layouts sometimes wrap children in nested wrapper elements
+// (MDX layouts, theme providers, etc.). GuidedTask must still locate the
+// legacy Solution through the chain.
+const deeplyWrappedLegacyHtml = renderToString(
+  React.createElement(
+    Exercise,
+    null,
+    'Problem text for deeply nested legacy fixture.',
+    React.createElement(
+      React.Fragment,
+      null,
+      React.createElement(
+        React.Fragment,
+        null,
+        React.createElement(
+          React.Fragment,
+          null,
+          React.createElement(Solution, null, 'Deeply nested legacy answer'),
+        ),
+      ),
+    ),
+  ),
+);
+assert.match(
+  deeplyWrappedLegacyHtml,
+  /Deeply nested legacy answer/,
+  'deeply nested Fragment-wrapped legacy Exercise must keep answer body in answer area',
+);
+assert.match(
+  deeplyWrappedLegacyHtml,
+  /Problem text for deeply nested legacy fixture\./,
+  'deeply nested Fragment-wrapped legacy Exercise must keep textual problem content',
+);
+assert.ok(
+  !deeplyWrappedLegacyHtml.includes(
+    'Problem text for deeply nested legacy fixture.Deeply nested legacy answer',
+  ),
+  'deeply nested Fragment-wrapped legacy must not bleed answer into problem area',
+);
+assert.doesNotMatch(
+  deeplyWrappedLegacyHtml,
+  /\u30d2\u30f3\u30c8\u3092\u898b\u308b/,
+  'deeply nested Fragment-wrapped legacy Exercise must not require Hint',
+);
+
+assertStructureError(
+  React.createElement(
+    Exercise,
+    null,
+    React.createElement(
+      React.Fragment,
+      null,
+      React.createElement(Hint, null, 'Mixed hint'),
+      React.createElement(Solution, null, 'Mixed legacy'),
+    ),
+  ),
+  /legacy Solution cannot be mixed with Hint or Answer/,
+  'Hint wrapped in Fragment alongside a Solution must still be rejected',
+);
+
+assertStructureError(
+  React.createElement(
+    Exercise,
+    null,
+    React.createElement(
+      React.Fragment,
+      null,
+      React.createElement(Solution, null, 'first'),
+      React.createElement(Solution, null, 'second'),
+    ),
+  ),
+  /legacy Exercise requires exactly one Solution/,
+  'multiple legacy Solutions inside one Fragment must be rejected',
+);
+
+// QuickCheck must never accept legacy Solution even if it bypasses the
+// Solution wrapper through a Fragment (real MDX layouts may wrap either
+// Solution or QuickCheck directly).
+assertStructureError(
+  React.createElement(
+    QuickCheck,
+    null,
+    'Problem statement',
+    React.createElement(
+      React.Fragment,
+      null,
+      React.createElement(Solution, null, 'Legacy answer in fragment'),
+    ),
+  ),
+  /QuickCheck does not allow legacy Solution/,
+  'QuickCheck should reject Fragment-wrapped Solution',
+);
+
+// Mixed new/legacy (Hint before legacy Solution) must still reject even
+// when wrapped in Fragment artifacts. This protects the final new-format
+// validation from being weakened by the deep-scan fallback.
+assertStructureError(
+  React.createElement(
+    Exercise,
+    null,
+    React.createElement(
+      React.Fragment,
+      null,
+      React.createElement(Hint, null, 'some hint'),
+      React.createElement(Solution, null, 'legacy after hint'),
+    ),
+  ),
+  /legacy Solution cannot be mixed with Hint or Answer/,
+  'Hint-then-Solution inside Fragment must still be rejected (mixed new/legacy)',
+);
+
+assertStructureError(
+  React.createElement(
+    Exercise,
+    null,
+    React.createElement(
+      React.Fragment,
+      null,
+      React.createElement(Solution, null, 'legacy answer'),
+      React.createElement(Solution, null, 'second legacy answer'),
+    ),
+  ),
+  /legacy Exercise requires exactly one Solution/,
+  'two Solutions inside one Fragment must be rejected',
 );
 
 // Mixed-with-Hint / new-Answer scenarios: legacy-marked Answer routed through

@@ -13,7 +13,12 @@ import {
   type AnswerRegistrationAction,
   type AnswerRegistrationPayload,
 } from './answerContext.js';
-import { isAnswerElement, isLegacySolutionElement } from './answerDetection.js';
+import {
+  findLegacySolutionDeep,
+  getFlatChildrenForLegacyDetection,
+  isAnswerElement,
+  isLegacySolutionElement,
+} from './answerDetection.js';
 import { startBlankPlaceholderObserver } from './blanks.js';
 import { exerciseClasses as classes } from './classes.js';
 import {
@@ -490,6 +495,64 @@ function extractLegacySolutionChildren(
   };
 }
 
+/**
+ * Locate the legacy Solution in the children tree using both direct-child
+ * detection (Pass 1) and a deep, fragment-flattening scan (Pass 2). Pass 2 is
+ * the robustness layer for real MDX/SSR builds that may wrap the legacy
+ * Solution in intermediate Fragment-like elements (e.g. MDX layout
+ * artifacts) before it reaches the `<Exercise>` boundary.
+ *
+ * Pass 2 deliberately refuses to wrap meaningful structural children
+ * (Hint/Answer/Solution-wrappers) — it only descends through transparent
+ * wrappers so misclassification cannot happen.
+ *
+ * Returns a discriminated union covering all deep-scan outcomes (found,
+ * ambiguous multiple matches, none found) so callers can surface accurate
+ * error messages instead of falling back to the unrelated "missing Hint"
+ * message.
+ */
+function locateLegacySolution(
+  rawChildren: ReactNode,
+  childrenArray: ReactNode[],
+):
+  | {
+      kind: 'single';
+      childrenArray: ReactNode[];
+      legacyElement: ReactElement<SolutionProps>;
+    }
+  | { kind: 'ambiguous'; total: number }
+  | null {
+  const directMatches = childrenArray.filter(isLegacySolutionElement);
+  if (directMatches.length === 1) {
+    return {
+      kind: 'single',
+      childrenArray,
+      legacyElement: directMatches[0] as ReactElement<SolutionProps>,
+    };
+  }
+
+  // Pass 2: deep scan through transparent wrappers (MDX/SSR artifacts).
+  const deepMatch = findLegacySolutionDeep(rawChildren);
+  if (!deepMatch) {
+    return null;
+  }
+
+  const flat =
+    getFlatChildrenForLegacyDetection(rawChildren).filter(hasMeaningfulContent);
+  const flatLegacyMatches = flat.filter(isLegacySolutionElement);
+  if (flatLegacyMatches.length !== 1) {
+    return {
+      kind: 'ambiguous',
+      total: flatLegacyMatches.length,
+    };
+  }
+  return {
+    kind: 'single',
+    childrenArray: flat,
+    legacyElement: deepMatch.element,
+  };
+}
+
 function extractGuidedTaskChildren(
   children: ReactNode,
   componentName: 'Exercise' | 'QuickCheck',
@@ -508,14 +571,38 @@ function extractGuidedTaskChildren(
     );
   }
 
-  const legacySolutionChildren = childrenArray.filter(isLegacySolutionElement);
-  if (legacySolutionChildren.length > 0) {
+  // Pass 1: legacy Solution detected among direct children.
+  // Pass 2: legacy Solution found through transparent wrapper descent
+  //   (MDX/SSR artifact compatibility).
+  const directLegacyChildren = childrenArray.filter(isLegacySolutionElement);
+  const deepLegacyDiscovered =
+    directLegacyChildren.length === 0
+      ? locateLegacySolution(children, childrenArray)
+      : null;
+
+  if (directLegacyChildren.length > 0 || deepLegacyDiscovered !== null) {
     if (componentName !== 'Exercise') {
       throw createStructureError(
         componentName,
         childrenArray,
         expectedOrder,
         'QuickCheck does not allow legacy Solution',
+      );
+    }
+    if (deepLegacyDiscovered) {
+      if (deepLegacyDiscovered.kind === 'ambiguous') {
+        throw createStructureError(
+          componentName,
+          getFlatChildrenForLegacyDetection(children).filter(
+            hasMeaningfulContent,
+          ),
+          expectedOrder,
+          `legacy Exercise requires exactly one Solution (found ${deepLegacyDiscovered.total})`,
+        );
+      }
+      return extractLegacySolutionChildren(
+        componentName,
+        deepLegacyDiscovered.childrenArray,
       );
     }
     return extractLegacySolutionChildren(componentName, childrenArray);
