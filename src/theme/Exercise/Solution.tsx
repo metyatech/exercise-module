@@ -1,5 +1,5 @@
 import { type ReactElement } from 'react';
-import Answer, { type AnswerProps } from './Answer.js';
+import Answer, { LEGACY_SOLUTION_MARKER, type AnswerProps } from './Answer.js';
 import { markExerciseComponent } from './componentMarkers.js';
 
 export const SOLUTION_COMPONENT_NAME = 'ExerciseSolution';
@@ -7,7 +7,7 @@ export const SOLUTION_COMPONENT_NAME = 'ExerciseSolution';
 export type SolutionProps = AnswerProps;
 
 function ExerciseSolution({ children }: SolutionProps): ReactElement {
-  return <Answer>{children}</Answer>;
+  return <Answer {...{ [LEGACY_SOLUTION_MARKER]: true }}>{children}</Answer>;
 }
 
 export default markExerciseComponent(

@@ -9,6 +9,11 @@ import Exercise, {
   QuickCheck,
   Solution,
 } from '../dist/theme/Exercise/index.js';
+import { LEGACY_SOLUTION_MARKER } from '../dist/theme/Exercise/Answer.js';
+import {
+  isAnswerElement,
+  isLegacySolutionElement,
+} from '../dist/theme/Exercise/answerDetection.js';
 import ClientExercise, {
   Answer as ClientAnswer,
   Hint as ClientHint,
@@ -92,6 +97,149 @@ const assertStructureError = (element, message) => {
     },
   );
 };
+
+// Regression: a pre-evaluated legacy adapter renders an <Answer> element with
+// the internal legacy marker prop. GuidedTask must still recognise it as a
+// legacy Solution for the Exercise legacy path.
+const preEvaluatedLegacyAnswer = React.createElement(
+  Answer,
+  { [LEGACY_SOLUTION_MARKER]: true },
+  'Pre-evaluated legacy answer',
+);
+assert.ok(
+  isLegacySolutionElement(preEvaluatedLegacyAnswer),
+  'Answer element carrying legacy marker should be detected as legacy Solution',
+);
+assert.ok(
+  !isAnswerElement(preEvaluatedLegacyAnswer),
+  'Answer element carrying legacy marker must not be detected as a normal Answer',
+);
+const preEvaluatedNewAnswer = React.createElement(Answer, null, 'New answer');
+assert.ok(
+  isAnswerElement(preEvaluatedNewAnswer),
+  'regular Answer without legacy marker should be detected as a normal Answer',
+);
+assert.ok(
+  !isLegacySolutionElement(preEvaluatedNewAnswer),
+  'regular Answer without legacy marker should not be detected as legacy Solution',
+);
+
+// Regression: invoke <Solution> as a function to obtain its returned element
+// (an <Answer> element carrying the legacy marker) and pass that captured
+// element as a child of <Exercise>. This is the exact bug scenario: someone
+// renders Solution eagerly, captures the resulting <Answer>, then hands it to
+// Exercise. GuidedTask must still route it through the legacy Solution path.
+const invokedSolutionElement = Solution({ children: 'Invoked legacy answer' });
+assert.ok(
+  React.isValidElement(invokedSolutionElement),
+  'Solution should be callable as a function and return a React element',
+);
+assert.ok(
+  isLegacySolutionElement(invokedSolutionElement),
+  'Solution invocation output (Answer with marker) must be detected as legacy Solution',
+);
+assert.ok(
+  !isAnswerElement(invokedSolutionElement),
+  'Solution invocation output must not be detected as a normal Answer',
+);
+const invokedLegacyHtml = renderToStaticMarkup(
+  React.createElement(Exercise, null, problem, invokedSolutionElement),
+);
+assert.match(
+  invokedLegacyHtml,
+  /Invoked legacy answer/,
+  'Exercise should accept the pre-evaluated legacy Solution element obtained by calling Solution',
+);
+assert.doesNotMatch(
+  invokedLegacyHtml,
+  /ヒントを見る/,
+  'pre-evaluated legacy Solution from calling Solution should not require Hint',
+);
+
+const preEvaluatedLegacyHtml = renderToStaticMarkup(
+  React.createElement(Exercise, null, problem, preEvaluatedLegacyAnswer),
+);
+assert.match(
+  preEvaluatedLegacyHtml,
+  /Pre-evaluated legacy answer/,
+  'Exercise legacy path should accept pre-evaluated legacy Answer',
+);
+assert.doesNotMatch(
+  preEvaluatedLegacyHtml,
+  /ヒントを見る/,
+  'pre-evaluated legacy Answer should not require Hint',
+);
+assert.match(
+  preEvaluatedLegacyHtml,
+  /rensyuKaitou/,
+  'pre-evaluated legacy Answer should preserve final DOM class string contract',
+);
+assert.match(
+  preEvaluatedLegacyHtml,
+  /rensyuKaitouNaiyou/,
+  'pre-evaluated legacy Answer should preserve answer content class contract',
+);
+
+// Mixed-with-Hint / new-Answer scenarios: legacy-marked Answer routed through
+// legacy path must still reject mixing with Hint or new Answer like any other
+// legacy Solution.
+assertStructureError(
+  React.createElement(
+    Exercise,
+    null,
+    problem,
+    React.createElement(Hint, null, 'Mixed hint'),
+    preEvaluatedLegacyAnswer,
+  ),
+  /legacy Solution cannot be mixed with Hint or Answer/,
+);
+assertStructureError(
+  React.createElement(
+    Exercise,
+    null,
+    problem,
+    preEvaluatedLegacyAnswer,
+    React.createElement(Answer, null, 'New answer after legacy'),
+  ),
+  /legacy Solution cannot be mixed with Hint or Answer/,
+);
+assertStructureError(
+  React.createElement(
+    Exercise,
+    null,
+    problem,
+    React.createElement(Hint, null, 'Only hint'),
+    preEvaluatedLegacyAnswer,
+    React.createElement(Answer, null, 'New answer after legacy'),
+  ),
+  /legacy Solution cannot be mixed with Hint or Answer/,
+);
+
+// QuickCheck must never accept legacy-marked Answer even if it bypasses the
+// Solution wrapper.
+const preEvaluatedLegacyAnswerForQuickCheck = React.createElement(
+  Answer,
+  { [LEGACY_SOLUTION_MARKER]: true },
+  'Pre-evaluated legacy answer',
+);
+let quickCheckRejected = false;
+try {
+  renderToStaticMarkup(
+    React.createElement(
+      QuickCheck,
+      null,
+      problem,
+      preEvaluatedLegacyAnswerForQuickCheck,
+    ),
+  );
+} catch (error) {
+  quickCheckRejected =
+    error instanceof Error && /legacy Solution/.test(error.message);
+}
+assert.ok(
+  quickCheckRejected,
+  'QuickCheck should reject pre-evaluated legacy Answer',
+);
 
 assertStructureError(
   React.createElement(

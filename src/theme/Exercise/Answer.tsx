@@ -9,16 +9,33 @@ import { markExerciseComponent } from './componentMarkers.js';
 
 export const ANSWER_COMPONENT_NAME = 'ExerciseAnswer';
 
+/**
+ * Internal marker used by the legacy `<Solution>` adapter to flag an
+ * `<Answer>` element as legacy Solution content. Treated as private API and is
+ * intentionally not exported through the public component props surface.
+ */
+export const LEGACY_SOLUTION_MARKER = '__exerciseLegacySolution';
+
 export interface AnswerProps {
   /** 解答として表示する内容 */
   children: ReactNode;
 }
 
-function ExerciseAnswer({ children }: AnswerProps): ReactElement {
+interface InternalAnswerProps extends AnswerProps {
+  [LEGACY_SOLUTION_MARKER]?: boolean;
+}
+
+function ExerciseAnswer({
+  children,
+  [LEGACY_SOLUTION_MARKER]: isLegacySolution,
+}: InternalAnswerProps): ReactElement {
   const registerAnswer = useContext(AnswerRegistrationContext);
 
   useEffect(() => {
     if (!registerAnswer) {
+      return;
+    }
+    if (isLegacySolution) {
       return;
     }
     registerAnswer({
@@ -31,7 +48,7 @@ function ExerciseAnswer({ children }: AnswerProps): ReactElement {
         content: children,
       });
     };
-  }, [children, registerAnswer]);
+  }, [children, isLegacySolution, registerAnswer]);
 
   if (registerAnswer) {
     return <></>;
