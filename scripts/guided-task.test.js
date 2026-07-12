@@ -170,6 +170,79 @@ const createClientReference = (id) => {
 const clientReferenceSolution = createClientReference(
   '@metyatech/exercise/dist/client.js#Solution',
 );
+const windowsClientReferenceSolution = createClientReference(
+  String.raw`D:\ghws\course-docs-site\node_modules\@metyatech\exercise\dist\client.js#Solution`,
+);
+const webpackClientReferenceSolution = createClientReference(
+  'webpack://course-docs-site/./node_modules/@metyatech/exercise/dist/client.js#Solution',
+);
+
+const windowsClientReferenceSolutionElement = React.createElement(
+  windowsClientReferenceSolution,
+  null,
+  'Windows client reference legacy answer',
+);
+assert.ok(
+  isLegacySolutionElement(windowsClientReferenceSolutionElement),
+  'exact Windows client-reference $$id should be detected as legacy Solution',
+);
+assert.ok(
+  !isAnswerElement(windowsClientReferenceSolutionElement),
+  'exact Windows client-reference $$id must not be detected as normal Answer',
+);
+const windowsClientReferenceLegacyHtml = renderToString(
+  React.createElement(
+    Exercise,
+    null,
+    'Problem text before Windows client reference Solution.',
+    windowsClientReferenceSolutionElement,
+  ),
+);
+assert.doesNotMatch(
+  windowsClientReferenceLegacyHtml,
+  /\u30d2\u30f3\u30c8\u3092\u898b\u308b/,
+  'Windows client-reference legacy Exercise must not require Hint',
+);
+assert.match(
+  windowsClientReferenceLegacyHtml,
+  /Problem text before Windows client reference Solution\./,
+  'Windows client-reference legacy Exercise must keep textual problem content',
+);
+assert.match(
+  windowsClientReferenceLegacyHtml,
+  /Windows client reference legacy answer/,
+  'Windows client-reference legacy Exercise must keep Solution body in answer area',
+);
+assert.ok(
+  !windowsClientReferenceLegacyHtml.includes(
+    'Problem text before Windows client reference Solution.Windows client reference legacy answer',
+  ),
+  'Windows client-reference legacy Exercise must not inline Solution body into problem area',
+);
+
+const webpackClientReferenceLegacyHtml = renderToString(
+  React.createElement(
+    Exercise,
+    null,
+    'Problem text before webpack client reference Solution.',
+    React.createElement(
+      webpackClientReferenceSolution,
+      null,
+      'Webpack client reference legacy answer',
+    ),
+  ),
+);
+assert.doesNotMatch(
+  webpackClientReferenceLegacyHtml,
+  /\u30d2\u30f3\u30c8\u3092\u898b\u308b/,
+  'webpack client-reference legacy Exercise must not require Hint',
+);
+assert.match(
+  webpackClientReferenceLegacyHtml,
+  /Webpack client reference legacy answer/,
+  'webpack client-reference legacy Exercise must keep Solution body in answer area',
+);
+
 const clientReferenceLegacyHtml = renderToString(
   React.createElement(
     Exercise,
