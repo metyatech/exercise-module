@@ -75,7 +75,7 @@ const quickCheckHtml = renderToStaticMarkup(
 );
 assert.match(
   quickCheckHtml,
-  /rensyuQuickCheck/,
+  /class="rensyuBlock rensyuQuickCheck"/,
   'QuickCheck should render modifier class',
 );
 assert.match(
@@ -375,6 +375,28 @@ await act(async () => {
   );
 });
 
+const hintDetails = root.querySelectorAll('details.rensyuHint');
+assert.equal(hintDetails.length, 1, 'Exercise should render one Hint details');
+assert.equal(
+  hintDetails[0]?.querySelector('summary')?.textContent,
+  'ヒントを見る',
+  'single Hint details should use the expected label',
+);
+assert.equal(
+  hintDetails[0]?.querySelector('.rensyuHintNaiyou')?.textContent,
+  `Hint ${blank('hint-only')}`,
+  'Hint details should render Hint content',
+);
+assert.equal(
+  root.querySelector('.rensyuBlock')?.children[1],
+  hintDetails[0],
+  'Hint details should render before Answer details',
+);
+assert.equal(
+  root.querySelector('.rensyuBlock')?.children[2]?.className,
+  'rensyuKaitou',
+  'Answer details should render after Hint details',
+);
 assert.equal(
   root.querySelectorAll('.rensyuNaiyou .rensyuBlankInput').length,
   1,
@@ -400,10 +422,62 @@ const styleText =
   dom.window.document.getElementById('metyatech-exercise-style')?.textContent ??
   '';
 assert.match(styleText, /\[data-theme='dark'\] \.rensyuHint/);
-assert.match(styleText, /\[data-theme='dark'\] \.rensyuQuickCheck/);
+assert.match(
+  styleText,
+  /\.rensyuBlock\.rensyuQuickCheck \{[^}]*background: linear-gradient\(135deg, rgba\(25, 118, 210, 0\.06\)/s,
+  'QuickCheck should have a distinct lighter style contract',
+);
+assert.match(
+  styleText,
+  /\.rensyuBlock\.rensyuQuickCheck \{[^}]*border: 1px dashed var\(--ifm-color-primary-lighter\)/s,
+  'QuickCheck should use a dashed lighter border',
+);
+assert.match(
+  styleText,
+  /\[data-theme='dark'\] \.rensyuBlock\.rensyuQuickCheck/,
+);
 
 await act(async () => {
   reactRoot.unmount();
+});
+
+const quickCheckRoot = createRoot(root);
+await act(async () => {
+  quickCheckRoot.render(
+    React.createElement(
+      QuickCheck,
+      { enableBlanks: true },
+      React.createElement('p', null, `Quick ${blank('beta')}`),
+      React.createElement(Hint, null, 'Quick hint'),
+      React.createElement(Answer, null, 'Quick answer'),
+    ),
+  );
+});
+
+const renderedQuickCheck = root.querySelector('.rensyuBlock.rensyuQuickCheck');
+assert.ok(renderedQuickCheck, 'QuickCheck should render quickcheck modifier');
+assert.equal(
+  root.querySelector('.rensyuQuickCheckTitle')?.textContent,
+  '理解度確認',
+  'QuickCheck should render title element',
+);
+assert.equal(
+  root.querySelectorAll('.rensyuNaiyou .rensyuBlankInput').length,
+  1,
+  'enableBlanks should apply inputs to QuickCheck problem area',
+);
+assert.ok(
+  !root.querySelector('.rensyuNaiyou')?.textContent?.includes('${'),
+  'QuickCheck problem placeholders should be replaced',
+);
+assert.equal(
+  root.querySelectorAll('.rensyuKaitouNaiyou .rensyuBlankTag').length,
+  1,
+  'QuickCheck Answer area should include auto answer tags',
+);
+
+await act(async () => {
+  quickCheckRoot.unmount();
 });
 
 console.log('guided-task test passed');

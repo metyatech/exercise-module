@@ -32,8 +32,9 @@ const stylesText = `
 }
 
 .${classes.section}.${classes.quickCheck} {
-  background: var(--ifm-background-surface-color);
-  border-style: dashed;
+  background: linear-gradient(135deg, rgba(25, 118, 210, 0.06) 0%, rgba(25, 118, 210, 0.03) 100%);
+  border: 1px dashed var(--ifm-color-primary-lighter);
+  box-shadow: none;
   padding: 1rem;
 }
 
@@ -44,7 +45,8 @@ const stylesText = `
 }
 
 [data-theme='dark'] .${classes.section}.${classes.quickCheck} {
-  background: rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, rgba(100, 181, 246, 0.12) 0%, rgba(100, 181, 246, 0.06) 100%);
+  border-color: var(--ifm-color-primary-dark);
 }
 
 .${classes.section}::before {
