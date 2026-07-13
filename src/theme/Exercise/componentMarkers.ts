@@ -11,7 +11,7 @@ const CLIENT_REFERENCE_EXPORTS_BY_MARKER: ReadonlyMap<
   string,
   ReadonlySet<string>
 > = new Map([
-  ['__exerciseAnswer', new Set(['Answer', 'Solution'])],
+  ['__exerciseAnswer', new Set(['Answer'])],
   ['__exerciseHint', new Set(['Hint'])],
   ['__exerciseGuidedTask', new Set(['QuickCheck', 'default'])],
 ]);

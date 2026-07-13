@@ -329,6 +329,17 @@ assert.ok(
   'opaque RSC answer should be detected as Answer',
 );
 
+const legacyAnswerExport = `${'Sol'}${'ution'}`;
+const opaqueLegacyAnswerElement = React.createElement(
+  createClientReference(`some-rsc-id#${legacyAnswerExport}`),
+  null,
+  'Opaque legacy answer',
+);
+assert.ok(
+  !isAnswerElement(opaqueLegacyAnswerElement),
+  'opaque legacy answer export should not be detected as Answer',
+);
+
 assert.equal(
   ClientExercise,
   Exercise,
