@@ -1,11 +1,17 @@
 type MarkableComponent = {
   $$id?: unknown;
+  $$typeof?: unknown;
   displayName?: string;
   name?: string;
   render?: unknown;
   type?: unknown;
+  _init?: unknown;
+  _payload?: unknown;
   [key: string]: unknown;
 };
+
+const REACT_LAZY_TYPE = Symbol.for('react.lazy');
+const UNMATCHED_LAZY_TYPE = Symbol('unmatched react lazy component type');
 
 const CLIENT_REFERENCE_EXPORTS_BY_MARKER: ReadonlyMap<
   string,
@@ -35,6 +41,33 @@ function matchesExerciseClientReference(
   return allowedExports?.has(exportName) ?? false;
 }
 
+function isMarkableComponent(type: unknown): type is MarkableComponent {
+  return (typeof type === 'function' || typeof type === 'object') && !!type;
+}
+
+function isThenable(value: unknown): boolean {
+  return isMarkableComponent(value) && typeof value.then === 'function';
+}
+
+function unwrapReactLazyComponentType(type: unknown): unknown {
+  if (!isMarkableComponent(type) || type.$$typeof !== REACT_LAZY_TYPE) {
+    return type;
+  }
+
+  if (typeof type._init !== 'function') {
+    return UNMATCHED_LAZY_TYPE;
+  }
+
+  try {
+    return type._init(type._payload);
+  } catch (error) {
+    if (isThenable(error)) {
+      throw error;
+    }
+    return UNMATCHED_LAZY_TYPE;
+  }
+}
+
 export function markExerciseComponent<T extends object>(
   component: T,
   markerName: string,
@@ -52,15 +85,28 @@ export function matchesMarkedComponentType(
   markerName: string,
   componentName: string,
 ): boolean {
+  const unwrappedType = unwrapReactLazyComponentType(type);
+  if (unwrappedType === UNMATCHED_LAZY_TYPE) {
+    return false;
+  }
+  if (unwrappedType !== type) {
+    return matchesMarkedComponentType(
+      unwrappedType,
+      reference,
+      markerName,
+      componentName,
+    );
+  }
+
   if (type === reference) {
     return true;
   }
 
-  if ((typeof type !== 'function' && typeof type !== 'object') || !type) {
+  if (!isMarkableComponent(type)) {
     return false;
   }
 
-  const candidate = type as MarkableComponent;
+  const candidate = type;
   if (
     candidate[markerName] === true ||
     matchesExerciseClientReference(candidate, markerName) ||

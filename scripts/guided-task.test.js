@@ -9,6 +9,7 @@ import Exercise, {
   QuickCheck,
 } from '../dist/theme/Exercise/index.js';
 import { isAnswerElement } from '../dist/theme/Exercise/answerDetection.js';
+import { isHintElement } from '../dist/theme/Exercise/hintDetection.js';
 import ClientExercise, {
   Answer as ClientAnswer,
   Hint as ClientHint,
@@ -111,6 +112,54 @@ const createClientReference = (id) => {
   return clientReference;
 };
 
+const createLazyClientReference = (id) => ({
+  $$typeof: Symbol.for('react.lazy'),
+  _payload: createClientReference(id),
+  _init: (payload) => payload,
+});
+
+const assertExtractedHintAndAnswer = ({
+  html,
+  hintText,
+  answerText,
+  description,
+}) => {
+  const fixtureDom = new JSDOM(
+    `<!doctype html><div id="fixture">${html}</div>`,
+  );
+  const fixture = fixtureDom.window.document.getElementById('fixture');
+  assert.ok(fixture, `${description}: fixture should exist`);
+
+  const problemAreaText =
+    fixture.querySelector('.rensyuNaiyou')?.textContent ?? '';
+  assert.doesNotMatch(
+    problemAreaText,
+    new RegExp(`${hintText}|${answerText}`),
+    `${description}: Hint and Answer content should not render inline`,
+  );
+  assert.equal(
+    fixture.querySelectorAll('details.rensyuHint').length,
+    1,
+    `${description}: should render one Hint details element`,
+  );
+  assert.equal(
+    fixture.querySelector('details.rensyuHint .rensyuHintNaiyou')?.textContent,
+    hintText,
+    `${description}: should extract Hint content into hint details`,
+  );
+  assert.equal(
+    fixture.querySelectorAll('details.rensyuKaitou').length,
+    1,
+    `${description}: should render one Answer details element`,
+  );
+  assert.equal(
+    fixture.querySelector('details.rensyuKaitou .rensyuKaitouNaiyou')
+      ?.textContent,
+    answerText,
+    `${description}: should extract Answer content into answer details`,
+  );
+};
+
 const rscBundledClientReferenceHint = createClientReference(
   'webpack-internal:///(rsc)/./node_modules/.../client.js#Hint',
 );
@@ -121,6 +170,18 @@ const opaqueBundledClientReferenceHint = createClientReference(
   'some-bundled-id#Hint',
 );
 const opaqueBundledClientReferenceAnswer = createClientReference(
+  'some-bundled-id#Answer',
+);
+const lazyRscBundledClientReferenceHint = createLazyClientReference(
+  'webpack-internal:///(rsc)/./node_modules/.../client.js#Hint',
+);
+const lazyRscBundledClientReferenceAnswer = createLazyClientReference(
+  'webpack-internal:///(rsc)/./node_modules/.../client.js#Answer',
+);
+const lazyOpaqueBundledClientReferenceHint = createLazyClientReference(
+  'some-bundled-id#Hint',
+);
+const lazyOpaqueBundledClientReferenceAnswer = createLazyClientReference(
   'some-bundled-id#Answer',
 );
 
@@ -189,6 +250,54 @@ assert.match(
   /Opaque bundled client reference answer/,
   'Exercise should render opaque bundled client-reference Answer content',
 );
+
+const lazyRscBundledClientReferenceQuickCheckHtml = renderToString(
+  React.createElement(
+    QuickCheck,
+    null,
+    'QuickCheck problem before lazy RSC bundled client references.',
+    React.createElement(
+      lazyRscBundledClientReferenceHint,
+      null,
+      'Lazy RSC bundled hint',
+    ),
+    React.createElement(
+      lazyRscBundledClientReferenceAnswer,
+      null,
+      'Lazy RSC bundled answer',
+    ),
+  ),
+);
+assertExtractedHintAndAnswer({
+  html: lazyRscBundledClientReferenceQuickCheckHtml,
+  hintText: 'Lazy RSC bundled hint',
+  answerText: 'Lazy RSC bundled answer',
+  description: 'QuickCheck lazy RSC bundled client references',
+});
+
+const lazyOpaqueBundledClientReferenceExerciseHtml = renderToString(
+  React.createElement(
+    Exercise,
+    null,
+    'Exercise problem before lazy opaque bundled client references.',
+    React.createElement(
+      lazyOpaqueBundledClientReferenceHint,
+      null,
+      'Lazy opaque bundled hint',
+    ),
+    React.createElement(
+      lazyOpaqueBundledClientReferenceAnswer,
+      null,
+      'Lazy opaque bundled answer',
+    ),
+  ),
+);
+assertExtractedHintAndAnswer({
+  html: lazyOpaqueBundledClientReferenceExerciseHtml,
+  hintText: 'Lazy opaque bundled hint',
+  answerText: 'Lazy opaque bundled answer',
+  description: 'Exercise lazy opaque bundled client references',
+});
 
 assertStructureError(
   React.createElement(Exercise, null, problem, answer),
@@ -338,6 +447,30 @@ const opaqueLegacyAnswerElement = React.createElement(
 assert.ok(
   !isAnswerElement(opaqueLegacyAnswerElement),
   'opaque legacy answer export should not be detected as Answer',
+);
+
+const lazyQuickCheckElement = React.createElement(
+  createLazyClientReference('some-rsc-id#QuickCheck'),
+  null,
+  'Lazy QuickCheck body',
+);
+assert.ok(
+  !isHintElement(lazyQuickCheckElement),
+  'lazy QuickCheck export should not be detected as Hint',
+);
+assert.ok(
+  !isAnswerElement(lazyQuickCheckElement),
+  'lazy QuickCheck export should not be detected as Answer',
+);
+
+const lazyLegacyAnswerElement = React.createElement(
+  createLazyClientReference(`some-rsc-id#${legacyAnswerExport}`),
+  null,
+  'Lazy legacy answer',
+);
+assert.ok(
+  !isAnswerElement(lazyLegacyAnswerElement),
+  'lazy legacy answer export should not be detected as Answer',
 );
 
 assert.equal(
