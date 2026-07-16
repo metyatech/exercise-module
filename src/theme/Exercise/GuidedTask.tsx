@@ -158,6 +158,7 @@ const stylesText = `
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
+  list-style: none;
   color: var(--ifm-color-emphasis-800);
   cursor: pointer;
   margin: 0;
