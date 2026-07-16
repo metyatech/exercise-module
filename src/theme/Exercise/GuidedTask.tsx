@@ -172,6 +172,12 @@ const stylesText = `
   display: none;
 }
 
+.${classes.hint} > summary::marker,
+.${classes.solution} > summary::marker {
+  content: '';
+  display: none;
+}
+
 .${classes.summaryLabel} {
   display: flex;
   align-items: flex-start;
