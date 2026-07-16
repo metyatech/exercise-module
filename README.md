@@ -134,7 +134,7 @@ The correct value is `${alpha}`.
   `Answer` child.
 - `answerTitle`: Label for the answer toggle (default: `解答を見る`).
 - `quickCheckTitle`: Small heading shown above the problem (default:
-  `Quick Check`).
+  `理解度確認`).
 - `enableBlanks`: Enable placeholder processing (default: `false`).
 
 ### Hint

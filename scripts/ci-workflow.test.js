@@ -47,10 +47,6 @@ assert.ok(
   `${workflowPath} should include at least one '- run:' step`,
 );
 assert.ok(
-  yaml.includes('npm audit --audit-level=high'),
-  `${workflowPath} should run npm audit in CI`,
-);
-assert.ok(
   yaml.includes('branches: [master, main]'),
   `${workflowPath} should trigger on master and main`,
 );

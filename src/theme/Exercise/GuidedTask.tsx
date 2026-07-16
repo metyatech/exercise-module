@@ -163,7 +163,6 @@ const stylesText = `
   cursor: pointer;
   margin: 0;
   padding: 0.65rem 0;
-  list-style: none;
   min-width: 0;
   line-height: 1.45;
 }
