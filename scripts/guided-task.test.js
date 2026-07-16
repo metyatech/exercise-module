@@ -648,6 +648,35 @@ assert.match(
 const styleText =
   dom.window.document.getElementById('metyatech-exercise-style')?.textContent ??
   '';
+const detailsLayoutRule = styleText.match(
+  /\.rensyuHint,\s*\.rensyuKaitou\s*\{([^}]*)\}/s,
+);
+const summaryLayoutRule = styleText.match(
+  /\.rensyuHint > summary,\s*\.rensyuKaitou > summary\s*\{([^}]*)\}/s,
+);
+const contentLayoutRule = styleText.match(
+  /\.rensyuHintNaiyou,\s*\.rensyuKaitouNaiyou\s*\{([^}]*)\}/s,
+);
+assert.ok(
+  detailsLayoutRule,
+  'Hint and Answer details layout rule should exist',
+);
+assert.ok(
+  summaryLayoutRule,
+  'Hint and Answer summary layout rule should exist',
+);
+assert.ok(
+  contentLayoutRule,
+  'Hint and Answer content layout rule should exist',
+);
+assert.match(detailsLayoutRule[1], /padding:\s*0;/);
+assert.match(summaryLayoutRule[1], /padding:\s*0\.65rem\s+0\.75rem;/);
+assert.match(contentLayoutRule[1], /margin:\s*0\s+0\.75rem\s+0\.75rem;/);
+assert.match(
+  styleText,
+  /\.rensyuHint > summary:hover,\s*\.rensyuKaitou > summary:hover\s*\{/s,
+  'Hint and Answer hover should target the full summary surface',
+);
 assert.match(styleText, /\[data-theme='dark'\] \.rensyuHint/);
 assert.match(
   styleText,

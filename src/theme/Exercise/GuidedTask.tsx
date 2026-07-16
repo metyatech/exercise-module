@@ -123,7 +123,7 @@ const stylesText = `
 .${classes.solution} {
   border: 1px solid var(--ifm-color-emphasis-300);
   border-radius: 12px;
-  padding: 0 0.75rem;
+  padding: 0;
   margin: 1rem 0 0;
   background-color: var(--ifm-background-surface-color, var(--ifm-background-color));
   box-shadow: none;
@@ -162,7 +162,7 @@ const stylesText = `
   color: var(--ifm-color-emphasis-800);
   cursor: pointer;
   margin: 0;
-  padding: 0.65rem 0;
+  padding: 0.65rem 0.75rem;
   min-width: 0;
   line-height: 1.45;
 }
@@ -232,7 +232,7 @@ const stylesText = `
 .${classes.hintContent},
 .${classes.solutionContent} {
   min-width: 0;
-  margin: 0 0 0.75rem;
+  margin: 0 0.75rem 0.75rem;
   padding: 0.75rem 0 0 1.6rem;
   border-top: 1px solid var(--ifm-color-emphasis-300);
   overflow-wrap: anywhere;
