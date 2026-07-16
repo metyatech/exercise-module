@@ -65,6 +65,26 @@ assert.match(
   'answerTitle should customize the answer label',
 );
 
+const directExerciseDom = new JSDOM(
+  `<!doctype html><div id="fixture">${directAnswerHtml}</div>`,
+).window.document;
+const exerciseHeader = directExerciseDom.querySelector('.rensyuTaskHeader');
+assert.equal(
+  exerciseHeader?.textContent,
+  '演習',
+  'Exercise should render a compact 演習 header',
+);
+assert.equal(
+  exerciseHeader?.querySelector('svg')?.getAttribute('data-guided-task-icon'),
+  'pencil',
+  'Exercise should render a pencil icon',
+);
+assert.doesNotMatch(
+  exerciseHeader?.textContent ?? '',
+  /^E$/,
+  'Exercise should not add a standalone E label',
+);
+
 const quickCheckHtml = renderToStaticMarkup(
   React.createElement(
     QuickCheck,
@@ -89,7 +109,71 @@ assert.match(
   /理解度確認/,
   'QuickCheck should render default title',
 );
-assert.match(quickCheckHtml, /答えを見る/, 'should label QuickCheck answer');
+assert.match(quickCheckHtml, /解答を見る/, 'should label QuickCheck answer');
+
+const quickCheckDom = new JSDOM(
+  `<!doctype html><div id="fixture">${quickCheckHtml}</div>`,
+).window.document;
+const classAttribute = (element) => element?.getAttribute('class');
+const summaryShape = (summary) => [
+  classAttribute(summary),
+  classAttribute(summary?.children[0]),
+  classAttribute(summary?.children[0]?.children[0]),
+  classAttribute(summary?.children[1]),
+];
+const exerciseHintSummary = directExerciseDom.querySelector(
+  'details.rensyuHint > summary',
+);
+const quickHintSummary = quickCheckDom.querySelector(
+  'details.rensyuHint > summary',
+);
+const exerciseAnswerSummary = directExerciseDom.querySelector(
+  'details.rensyuKaitou > summary',
+);
+const quickAnswerSummary = quickCheckDom.querySelector(
+  'details.rensyuKaitou > summary',
+);
+assert.deepEqual(
+  summaryShape(exerciseHintSummary),
+  summaryShape(quickHintSummary),
+  'Exercise and QuickCheck Hint summaries should share the same structure',
+);
+assert.deepEqual(
+  summaryShape(exerciseAnswerSummary),
+  summaryShape(quickAnswerSummary),
+  'Exercise and QuickCheck Answer summaries should share the same structure',
+);
+assert.equal(
+  exerciseHintSummary
+    ?.querySelector('svg')
+    ?.getAttribute('data-guided-task-icon'),
+  'lightbulb',
+  'Hint should use a lightbulb icon',
+);
+assert.equal(
+  exerciseAnswerSummary
+    ?.querySelector('svg')
+    ?.getAttribute('data-guided-task-icon'),
+  'checkCircle',
+  'Answer should use a check-circle icon',
+);
+for (const icon of directExerciseDom.querySelectorAll('svg')) {
+  assert.equal(
+    icon.getAttribute('aria-hidden'),
+    'true',
+    'icons should be decorative',
+  );
+  assert.equal(
+    icon.getAttribute('focusable'),
+    'false',
+    'icons should not be focusable',
+  );
+}
+assert.equal(
+  directExerciseDom.querySelectorAll('details[open]').length,
+  0,
+  'guided task details should be closed initially',
+);
 
 const assertStructureError = (element, message, description) => {
   assert.throws(
@@ -522,11 +606,21 @@ assert.equal(
 );
 assert.equal(
   root.querySelector('.rensyuBlock')?.children[1],
+  root.querySelector('.rensyuNaiyou'),
+  'problem content should render before Hint details',
+);
+assert.equal(
+  root.querySelector('.rensyuBlock')?.children[2],
   hintDetails[0],
   'Hint details should render before Answer details',
 );
 assert.equal(
   root.querySelector('.rensyuBlock')?.children[2]?.className,
+  'rensyuHint',
+  'Hint details should keep their existing class',
+);
+assert.equal(
+  root.querySelector('.rensyuBlock')?.children[3]?.className,
   'rensyuKaitou',
   'Answer details should render after Hint details',
 );
@@ -557,18 +651,16 @@ const styleText =
 assert.match(styleText, /\[data-theme='dark'\] \.rensyuHint/);
 assert.match(
   styleText,
-  /\.rensyuBlock\.rensyuQuickCheck \{[^}]*background: linear-gradient\(135deg, rgba\(25, 118, 210, 0\.06\)/s,
-  'QuickCheck should have a distinct lighter style contract',
+  /\.rensyuBlock\.rensyuQuickCheck \{[^}]*border-top: 3px/s,
+  'QuickCheck should have a lighter top accent',
 );
 assert.match(
   styleText,
-  /\.rensyuBlock\.rensyuQuickCheck \{[^}]*border: 1px dashed var\(--ifm-color-primary-lighter\)/s,
-  'QuickCheck should use a dashed lighter border',
+  /\.rensyuBlock \{[^}]*border-top: 5px/s,
+  'Exercise should have a stronger top accent',
 );
-assert.match(
-  styleText,
-  /\[data-theme='dark'\] \.rensyuBlock\.rensyuQuickCheck/,
-);
+assert.doesNotMatch(styleText, /linear-gradient/);
+assert.doesNotMatch(styleText, /content:\s*['"](?:💪|▶)/);
 
 await act(async () => {
   reactRoot.unmount();

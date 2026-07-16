@@ -68,7 +68,7 @@ are labeled `ヒント1`, `ヒント2`, and so on. The answer summary defaults t
 ### QuickCheck
 
 Use `QuickCheck` for shorter checks. It uses the same child structure as
-`Exercise`, but the answer summary defaults to `答えを見る`.
+`Exercise`, and the answer summary also defaults to `解答を見る`.
 
 ```mdx
 import { Answer, Hint, QuickCheck } from '@metyatech/exercise/client';
@@ -132,7 +132,7 @@ The correct value is `${alpha}`.
 
 - `children` (required): Problem content, one or more `Hint` children, and one
   `Answer` child.
-- `answerTitle`: Label for the answer toggle (default: `答えを見る`).
+- `answerTitle`: Label for the answer toggle (default: `解答を見る`).
 - `quickCheckTitle`: Small heading shown above the problem (default:
   `Quick Check`).
 - `enableBlanks`: Enable placeholder processing (default: `false`).

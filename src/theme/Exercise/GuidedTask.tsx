@@ -21,79 +21,83 @@ const GUIDED_TASK_COMPONENT_NAME = 'GuidedTask';
 
 const stylesText = `
 .${classes.section} {
-  background: linear-gradient(135deg, #f0f7ff 0%, #e6f3ff 100%);
-  border: 2px solid var(--ifm-color-primary-light);
-  border-radius: 12px;
-  padding: 1.5rem;
+  background-color: var(--ifm-background-surface-color, var(--ifm-background-color));
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-top: 5px solid var(--ifm-color-primary);
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
   margin: 2rem 0;
-  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.15);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1);
+  box-shadow: 0 4px 12px color-mix(in srgb, #0f172a 10%, transparent);
   position: relative;
   max-width: 100%;
+  min-width: 0;
 }
 
 .${classes.section}.${classes.quickCheck} {
-  background: linear-gradient(135deg, rgba(25, 118, 210, 0.06) 0%, rgba(25, 118, 210, 0.03) 100%);
-  border: 1px dashed var(--ifm-color-primary-lighter);
+  background-color: var(--ifm-background-color);
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-top: 3px solid var(--ifm-color-primary-light);
+  border-radius: 14px;
   box-shadow: none;
   padding: 1rem;
+  margin: 1.25rem 0;
 }
 
 [data-theme='dark'] .${classes.section} {
-  background: linear-gradient(135deg, #1a2332 0%, #253140 100%);
-  border-color: var(--ifm-color-primary-darker);
-  box-shadow: 0 4px 12px rgba(100, 181, 246, 0.15);
+  background-color: var(--ifm-background-surface-color, var(--ifm-background-color));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.26);
+  box-shadow: 0 4px 12px color-mix(in srgb, #000 26%, transparent);
 }
 
 [data-theme='dark'] .${classes.section}.${classes.quickCheck} {
-  background: linear-gradient(135deg, rgba(100, 181, 246, 0.12) 0%, rgba(100, 181, 246, 0.06) 100%);
-  border-color: var(--ifm-color-primary-dark);
+  background-color: var(--ifm-background-color);
+  box-shadow: none;
 }
 
-.${classes.section}::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 6px;
-  background: linear-gradient(180deg, var(--ifm-color-primary) 0%, var(--ifm-color-primary-light) 100%);
-}
-
-.${classes.section} h3,
-.${classes.section} h4 {
-  color: var(--ifm-color-primary-dark);
-  font-weight: 700;
-  margin-top: 0;
+.${classes.taskHeader} {
   display: flex;
   align-items: center;
-  margin-bottom: 1rem;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem;
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
 }
 
-[data-theme='dark'] .${classes.section} h3,
-[data-theme='dark'] .${classes.section} h4 {
-  color: var(--ifm-color-primary-light);
-}
-
-.${classes.section} h3::before,
-.${classes.section} h4::before {
-  content: '💪';
-  margin-right: 0.8rem;
-  font-size: 1.2em;
+.${classes.taskHeaderIcon} {
+  width: 1.1rem;
+  height: 1.1rem;
+  flex: 0 0 auto;
+  color: var(--ifm-color-primary);
 }
 
 .${classes.quickCheckTitle} {
-  color: var(--ifm-color-primary-dark);
-  font-weight: var(--ifm-font-weight-bold);
-  margin-bottom: 0.75rem;
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.875rem;
+  font-weight: 600;
 }
 
+[data-theme='dark'] .${classes.taskHeader},
 [data-theme='dark'] .${classes.quickCheckTitle} {
-  color: var(--ifm-color-primary-light);
+  color: var(--ifm-color-emphasis-700);
+}
+
+.${classes.content} {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.${classes.content} > * {
+  min-width: 0;
 }
 
 .${classes.section} .prism-code {
   border: 1px solid var(--ifm-color-primary-lighter);
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--ifm-pre-background, var(--ifm-background-color));
   width: 100%;
   box-sizing: border-box;
   max-width: 100%;
@@ -109,59 +113,58 @@ const stylesText = `
   white-space: pre;
 }
 
-.${classes.content} > * {
-  min-width: 0;
-}
-
-.${classes.content} {
-  display: grid;
-  gap: 1.25rem;
-}
-
 .${classes.section} ol,
 .${classes.section} ul {
-  background: rgba(255, 255, 255, 0.6);
-  border-radius: 8px;
-  padding: 1rem 1.5rem;
-  margin: 1rem 0;
-}
-
-[data-theme='dark'] .${classes.section} ol,
-[data-theme='dark'] .${classes.section} ul {
-  background: rgba(0, 0, 0, 0.2);
-}
-
-.${classes.section} ol > li {
-  font-weight: 600;
-  color: var(--ifm-color-primary-dark);
-  margin-bottom: 1rem;
-}
-
-[data-theme='dark'] .${classes.section} ol > li {
-  color: var(--ifm-color-primary-light);
+  background-color: transparent;
+  border-radius: 0;
 }
 
 .${classes.hint},
 .${classes.solution} {
   border: 1px solid var(--ifm-color-emphasis-300);
-  border-radius: var(--ifm-border-radius);
-  padding: var(--ifm-alert-padding-vertical) var(--ifm-alert-padding-horizontal);
-  margin: var(--ifm-spacing-vertical) 0;
-  background-color: var(--ifm-background-surface-color);
-  box-shadow: var(--ifm-global-shadow-lw);
+  border-radius: 12px;
+  padding: 0 0.75rem;
+  margin: 1rem 0 0;
+  background-color: var(--ifm-background-surface-color, var(--ifm-background-color));
+  box-shadow: none;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.${classes.hint} {
+  border-color: var(--ifm-color-warning, #b45309);
+  background-color: rgba(245, 158, 11, 0.035);
+  background-color: color-mix(in srgb, var(--ifm-color-warning, #b45309) 4%, var(--ifm-background-surface-color, var(--ifm-background-color)));
+}
+
+.${classes.solution} {
+  border-color: var(--ifm-color-success, #0f766e);
+  background-color: rgba(13, 148, 136, 0.035);
+  background-color: color-mix(in srgb, var(--ifm-color-success, #0f766e) 4%, var(--ifm-background-surface-color, var(--ifm-background-color)));
+}
+
+.${classes.hint}[open] {
+  background-color: rgba(245, 158, 11, 0.07);
+  background-color: color-mix(in srgb, var(--ifm-color-warning, #b45309) 7%, var(--ifm-background-surface-color, var(--ifm-background-color)));
+}
+
+.${classes.solution}[open] {
+  background-color: rgba(13, 148, 136, 0.07);
+  background-color: color-mix(in srgb, var(--ifm-color-success, #0f766e) 7%, var(--ifm-background-surface-color, var(--ifm-background-color)));
 }
 
 .${classes.hint} > summary,
 .${classes.solution} > summary {
-  font-weight: var(--ifm-font-weight-bold);
-  color: var(--ifm-color-primary-dark);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  color: var(--ifm-color-emphasis-800);
   cursor: pointer;
-  margin-bottom: 0;
-  padding: 0;
+  margin: 0;
+  padding: 0.65rem 0;
   list-style: none;
-  outline: none;
-  position: relative;
-  padding-left: 1.5rem;
+  min-width: 0;
+  line-height: 1.45;
 }
 
 .${classes.hint} > summary::-webkit-details-marker,
@@ -169,50 +172,80 @@ const stylesText = `
   display: none;
 }
 
-.${classes.hint} > summary::before,
-.${classes.solution} > summary::before {
-  content: '▶';
-  position: absolute;
-  left: 0;
-  top: 0;
-  color: var(--ifm-color-primary);
-  font-size: 0.8em;
+.${classes.summaryLabel} {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.${classes.summaryLabel} > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.${classes.summaryIcon},
+.${classes.summaryChevron} {
+  width: 1.1rem;
+  height: 1.1rem;
+  flex: 0 0 auto;
+}
+
+.${classes.hint} .${classes.summaryIcon} {
+  color: var(--ifm-color-warning, #b45309);
+}
+
+.${classes.solution} .${classes.summaryIcon} {
+  color: var(--ifm-color-success, #0f766e);
+}
+
+.${classes.summaryChevron} {
+  margin-left: auto;
+  color: var(--ifm-color-emphasis-600);
   transition: transform 0.2s ease;
 }
 
-.${classes.hint}[open] > summary::before,
-.${classes.solution}[open] > summary::before {
+.${classes.hint}[open] .${classes.summaryChevron},
+.${classes.solution}[open] .${classes.summaryChevron} {
   transform: rotate(90deg);
-}
-
-[data-theme='dark'] .${classes.hint} > summary,
-[data-theme='dark'] .${classes.solution} > summary {
-  color: var(--ifm-color-primary-light);
 }
 
 .${classes.hint} > summary:hover,
 .${classes.solution} > summary:hover {
-  color: var(--ifm-color-primary);
+  background-color: color-mix(in srgb, var(--ifm-color-emphasis-100) 55%, transparent);
+}
+
+.${classes.hint} > summary:focus-visible,
+.${classes.solution} > summary:focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 3px;
 }
 
 .${classes.hintContent},
 .${classes.solutionContent} {
-  margin-top: var(--ifm-spacing-vertical);
-  padding-top: var(--ifm-spacing-vertical);
+  min-width: 0;
+  margin: 0 0 0.75rem;
+  padding: 0.75rem 0 0 1.6rem;
   border-top: 1px solid var(--ifm-color-emphasis-300);
+  overflow-wrap: anywhere;
 }
 
-.${classes.hint}::details-content,
-.${classes.solution}::details-content {
-  transition: height 306ms ease-in-out, content-visibility 306ms allow-discrete;
-  interpolate-size: allow-keywords;
-  overflow: hidden;
-  height: 0;
+.${classes.hintContent} {
+  border-top-color: color-mix(in srgb, var(--ifm-color-warning, #b45309) 35%, var(--ifm-color-emphasis-300));
 }
 
-.${classes.hint}[open]::details-content,
-.${classes.solution}[open]::details-content {
-  height: auto;
+.${classes.solutionContent} {
+  border-top-color: color-mix(in srgb, var(--ifm-color-success, #0f766e) 35%, var(--ifm-color-emphasis-300));
+}
+
+[data-theme='dark'] .${classes.hintContent} {
+  border-top-color: color-mix(in srgb, var(--ifm-color-warning, #f59e0b) 45%, var(--ifm-color-emphasis-300));
+}
+
+[data-theme='dark'] .${classes.solutionContent} {
+  border-top-color: color-mix(in srgb, var(--ifm-color-success, #14b8a6) 45%, var(--ifm-color-emphasis-300));
 }
 
 .${classes.blankWrap} {
@@ -284,6 +317,7 @@ const stylesText = `
 `;
 
 type GuidedTaskVariant = 'exercise' | 'quickCheck';
+type GuidedTaskIconName = 'pencil' | 'checkCircle' | 'lightbulb' | 'chevron';
 
 type ExtractedChildren = {
   answerContent: ReactNode;
@@ -514,6 +548,55 @@ function getHintTitle(index: number, total: number): string {
   return total === 1 ? 'ヒントを見る' : `ヒント${index + 1}`;
 }
 
+function renderGuidedTaskIcon(
+  name: GuidedTaskIconName,
+  className: string,
+): ReactElement {
+  const iconProps = {
+    'aria-hidden': true,
+    className,
+    'data-guided-task-icon': name,
+    focusable: false,
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 1.8,
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const,
+  };
+
+  switch (name) {
+    case 'pencil':
+      return (
+        <svg {...iconProps}>
+          <path d="m4 20 3.7-.8L19 7.9a2.1 2.1 0 0 0-3-3L4.8 16.2 4 20Z" />
+          <path d="m14.5 6.5 3 3" />
+        </svg>
+      );
+    case 'checkCircle':
+      return (
+        <svg {...iconProps}>
+          <circle cx="12" cy="12" r="9" />
+          <path d="m8 12 2.5 2.5L16 9" />
+        </svg>
+      );
+    case 'lightbulb':
+      return (
+        <svg {...iconProps}>
+          <path d="M9 18h6" />
+          <path d="M10 21h4" />
+          <path d="M8.4 14.5A6 6 0 1 1 15.6 14.5c-.8.7-1.3 1.5-1.5 2.5h-4.2c-.2-1-.7-1.8-1.5-2.5Z" />
+        </svg>
+      );
+    case 'chevron':
+      return (
+        <svg {...iconProps}>
+          <path d="m9 18 6-6-6-6" />
+        </svg>
+      );
+  }
+}
+
 function GuidedTask({
   children,
   answerTitle,
@@ -549,25 +632,45 @@ function GuidedTask({
     variant === 'quickCheck'
       ? `${classes.section} ${classes.quickCheck}`
       : classes.section;
-  const resolvedAnswerTitle =
-    answerTitle ?? (variant === 'quickCheck' ? '答えを見る' : '解答を見る');
+  const resolvedAnswerTitle = answerTitle ?? '解答を見る';
 
   return (
     <div className={sectionClassName} ref={rootRef}>
       {variant === 'quickCheck' && (
-        <div className={classes.quickCheckTitle}>{quickCheckTitle}</div>
+        <div className={`${classes.taskHeader} ${classes.quickCheckTitle}`}>
+          {renderGuidedTaskIcon('checkCircle', classes.taskHeaderIcon)}
+          <span>{quickCheckTitle}</span>
+        </div>
+      )}
+      {variant === 'exercise' && (
+        <div className={classes.taskHeader}>
+          {renderGuidedTaskIcon('pencil', classes.taskHeaderIcon)}
+          <span>演習</span>
+        </div>
       )}
       <div className={classes.content}>{problemChildren}</div>
       {hintChildren.map((hintChild, index) => (
         <details className={classes.hint} key={hintChild.key ?? index}>
-          <summary>{getHintTitle(index, hintChildren.length)}</summary>
+          <summary className={classes.summary}>
+            <span className={classes.summaryLabel}>
+              {renderGuidedTaskIcon('lightbulb', classes.summaryIcon)}
+              <span>{getHintTitle(index, hintChildren.length)}</span>
+            </span>
+            {renderGuidedTaskIcon('chevron', classes.summaryChevron)}
+          </summary>
           <div className={classes.hintContent}>
             {(hintChild.props as HintProps).children}
           </div>
         </details>
       ))}
       <details className={classes.solution}>
-        <summary>{resolvedAnswerTitle}</summary>
+        <summary className={classes.summary}>
+          <span className={classes.summaryLabel}>
+            {renderGuidedTaskIcon('checkCircle', classes.summaryIcon)}
+            <span>{resolvedAnswerTitle}</span>
+          </span>
+          {renderGuidedTaskIcon('chevron', classes.summaryChevron)}
+        </summary>
         <div className={classes.solutionContent}>{detectedAnswerContent}</div>
       </details>
     </div>
