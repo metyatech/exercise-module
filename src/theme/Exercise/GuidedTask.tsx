@@ -226,7 +226,7 @@ const stylesText = `
 .${classes.hint} > summary:focus-visible,
 .${classes.solution} > summary:focus-visible {
   outline: 2px solid var(--ifm-color-primary);
-  outline-offset: 3px;
+  outline-offset: -2px;
 }
 
 .${classes.hintContent},
