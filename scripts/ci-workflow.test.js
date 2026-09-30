@@ -51,4 +51,7 @@ assert.ok(
   `${workflowPath} should trigger on master and main`,
 );
 
+assert.ok(yaml.includes('actions/checkout@v6'));
+assert.ok(yaml.includes('actions/setup-node@v6'));
+assert.ok(yaml.includes('run: npm run verify'));
 console.log('ci-workflow structure test passed');

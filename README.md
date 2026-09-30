@@ -5,7 +5,7 @@ answers, quick checks, and fill-in-the-blank placeholders.
 
 ## Features
 
-- Styled `Exercise` block with a problem area, one or more hints, and an answer.
+- Styled `Exercise` block with a problem area, optional hints, and an answer.
 - Lightweight `QuickCheck` block for short comprehension checks.
 - Collapsible native `details`/`summary` sections for hints and answers.
 - Optional fill-in-the-blank inputs using `${answer}` placeholders.
@@ -158,7 +158,13 @@ target the class names (e.g. `rensyuBlock`, `rensyuNaiyou`, `rensyuHint`,
 - `npm run lint`: Run ESLint and type check.
 - `npm run format`: Format code with Prettier.
 - `npm test`: Run tests.
-- `npm run verify`: Run lint, format check, and tests.
+- `npm run verify`: Run lint, format check, tests, and `npm audit` across all
+  dependency scopes; known vulnerabilities fail verification.
+
+Build-tool security overrides preserve the existing `minimatch` policy and pin
+patched `serialize-javascript`, SockJS `uuid`, and `qs` releases. The dependency
+security test exercises the CommonJS APIs used by the upstream build tools and
+rejects the serializer code-injection and UUID buffer-boundary regressions.
 
 ## AGENTS.md
 
