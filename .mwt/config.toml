@@ -18,4 +18,3 @@ allow_tracked_seed_changes = false
 
 [verify]
 command = "npm run verify"
-
