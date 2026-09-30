@@ -383,11 +383,38 @@ assertExtractedHintAndAnswer({
   description: 'Exercise lazy opaque bundled client references',
 });
 
-assertStructureError(
-  React.createElement(Exercise, null, problem, answer),
-  /at least one Hint is required/,
-  'Exercise without Hint should fail',
-);
+for (const Task of [Exercise, QuickCheck]) {
+  for (const count of [0, 1, 2]) {
+    const html = renderToStaticMarkup(
+      React.createElement(
+        Task,
+        null,
+        problem,
+        ...Array.from({ length: count }, (_, index) =>
+          React.createElement(Hint, { key: index }, `Hint ${index}`),
+        ),
+        answer,
+      ),
+    );
+    const fixture = new JSDOM(html).window;
+    assert.equal(
+      fixture.document.querySelectorAll('details.rensyuHint').length,
+      count,
+    );
+    assert.equal(
+      fixture.document.querySelectorAll('details.rensyuKaitou').length,
+      1,
+    );
+    fixture.close();
+  }
+  for (const children of [[problem], [problem, hint]]) {
+    assertStructureError(
+      React.createElement(Task, null, ...children),
+      /exactly one Answer is required/,
+      'Answer remains required with zero or one Hint',
+    );
+  }
+}
 assertStructureError(
   React.createElement(Exercise, null, problem, hint),
   /exactly one Answer is required/,
@@ -445,23 +472,15 @@ assertStructureError(
   /nested Exercise or QuickCheck is not allowed/,
   'Exercise should reject nested guided tasks',
 );
-assertStructureError(
-  React.createElement(
-    QuickCheck,
-    null,
-    'QuickCheck problem before non-matching Hint export.',
+assert.equal(
+  isHintElement(
     React.createElement(
       createClientReference('some-bundled-id#NotHint'),
       null,
       'Wrong hint export body',
     ),
-    React.createElement(
-      opaqueBundledClientReferenceAnswer,
-      null,
-      'Answer still detected',
-    ),
   ),
-  /at least one Hint is required/,
+  false,
   'non-Hint bundled export should not be treated as Hint',
 );
 assertStructureError(
@@ -733,5 +752,40 @@ assert.equal(
 await act(async () => {
   quickCheckRoot.unmount();
 });
+
+for (const Task of [Exercise, QuickCheck]) {
+  const taskRoot = createRoot(root);
+  try {
+    for (const count of [0, 1, 2, 0]) {
+      await act(async () => {
+        taskRoot.render(
+          React.createElement(
+            Task,
+            null,
+            problem,
+            ...Array.from({ length: count }, (_, index) =>
+              React.createElement(Hint, { key: index }, `Hint ${index}`),
+            ),
+            answer,
+          ),
+        );
+      });
+      assert.equal(
+        root.querySelectorAll('details.rensyuHint').length,
+        count,
+        'mount and updates reflect optional hints',
+      );
+      assert.equal(root.querySelectorAll('details.rensyuKaitou').length, 1);
+      assert.equal(
+        root.querySelector('.rensyuKaitouNaiyou').textContent,
+        'Answer text',
+      );
+    }
+  } finally {
+    await act(async () => taskRoot.unmount());
+    assert.equal(root.childElementCount, 0);
+  }
+}
+dom.window.close();
 
 console.log('guided-task test passed');

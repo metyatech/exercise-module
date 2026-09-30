@@ -60,7 +60,7 @@ Use `background-color` with the desired color value.
 </Exercise>
 ```
 
-`Exercise` requires problem content, at least one `Hint`, and exactly one
+`Exercise` requires problem content, zero or more `Hint` blocks, and exactly one
 `Answer` in that order. A single hint is labeled `ヒントを見る`; multiple hints
 are labeled `ヒント1`, `ヒント2`, and so on. The answer summary defaults to
 `解答を見る`.
@@ -123,14 +123,14 @@ The correct value is `${alpha}`.
 
 ### Exercise
 
-- `children` (required): Problem content, one or more `Hint` children, and one
+- `children` (required): Problem content, zero or more `Hint` children, and one
   `Answer` child.
 - `answerTitle`: Label for the answer toggle (default: `解答を見る`).
 - `enableBlanks`: Enable placeholder processing (default: `false`).
 
 ### QuickCheck
 
-- `children` (required): Problem content, one or more `Hint` children, and one
+- `children` (required): Problem content, zero or more `Hint` children, and one
   `Answer` child.
 - `answerTitle`: Label for the answer toggle (default: `解答を見る`).
 - `quickCheckTitle`: Small heading shown above the problem (default:

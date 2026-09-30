@@ -440,7 +440,7 @@ function extractGuidedTaskChildren(
 ): ExtractedChildren {
   const childrenArray = Children.toArray(children).filter(hasMeaningfulContent);
   const expectedOrder =
-    'problem content, one or more Hint, then exactly one Answer';
+    'problem content, zero or more Hint, then exactly one Answer';
 
   const nestedChild = childrenArray.find(isNestedGuidedTaskElement);
   if (nestedChild) {
@@ -500,14 +500,6 @@ function extractGuidedTaskChildren(
       childrenArray,
       expectedOrder,
       'problem content is required',
-    );
-  }
-  if (hintChildren.length < 1) {
-    throw createStructureError(
-      componentName,
-      childrenArray,
-      expectedOrder,
-      'at least one Hint is required',
     );
   }
   if (answerChildren.length !== 1) {
